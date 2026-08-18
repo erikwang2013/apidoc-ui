@@ -1,4 +1,9 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
+import axios, {
+  AxiosInstance,
+  AxiosRequestConfig,
+  AxiosResponse,
+  InternalAxiosRequestConfig,
+} from 'axios'
 import { IResponse } from './type'
 import { FeConfig } from '/@/store/modules/app/types'
 import { getApidocUrls } from '/@/api/index'
@@ -35,7 +40,7 @@ const axiosInstance: AxiosInstance = axios.create({
 
 // axios实例拦截请求
 axiosInstance.interceptors.request.use(
-  (config: AxiosRequestConfig) => {
+  (config: InternalAxiosRequestConfig) => {
     if (!apidocUrls.length) {
       apidocUrls = getApidocUrls()
     }

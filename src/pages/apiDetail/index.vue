@@ -142,7 +142,7 @@
     currentMethod: '',
     activeTab: tabs[0],
     error: {
-      config: {},
+      config: {} as any,
       isAxiosError: false,
       toJSON: () => {
         return {}
@@ -222,7 +222,7 @@
       })
       .catch((err) => {
         state[loadField] = false
-        if (err.status == 200 && err.response && err.response.data && err.response.data.code != 0) {
+        if (err.data && err.data.code != 0) {
           state.error = err
           state[loadField] = false
           return

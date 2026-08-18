@@ -143,7 +143,7 @@
   import { Empty } from 'ant-design-vue'
   import { ObjectType } from '/#/index'
   import { useI18n } from '/@/hooks/useI18n'
-  import { Dashboard } from '/@/store/modules/apidoc/types'
+  import { Dashboard } from '/@/store/modules/Apidoc/types'
   import packageConfig from '../../../package.json'
 
   const APP_VERSION = packageConfig.version

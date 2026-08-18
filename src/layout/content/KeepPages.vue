@@ -8,6 +8,7 @@
       class="iframe"
       :style="{ display: item.fullPath == route.fullPath ? 'block' : 'none' }"
       border="0"
+      sandbox="allow-scripts allow-same-origin allow-forms"
     ></iframe>
   </div>
 </template>

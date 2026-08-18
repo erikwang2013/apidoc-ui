@@ -91,7 +91,7 @@
   import { DeviceEnum } from '/@/enums/appEnum'
   import EditShareModal from './EditShare.vue'
   import { message } from 'ant-design-vue'
-  import { copyTextToClipboard } from '/@/utils/helper/index'
+  import { copyTextToClipboard, downloadFile } from '/@/utils/helper/index'
 
   const props = defineProps({
     onSuccess: {
@@ -179,6 +179,44 @@
     copyTextToClipboard(link)
     message.success(t('common.copySuccess'))
   }
+  // 服务端 share action 约定返回 JSON：{ action: 'xxx', params: {...} }，由前端解释执行。
+  // 服务端配置的 click 回调需返回该结构；不再支持返回任意 JS 脚本执行。
+  const dispatchShareAction = (data: any) => {
+    let actionData = data
+    if (typeof data === 'string') {
+      try {
+        actionData = JSON.parse(data)
+      } catch (error) {
+        actionData = null
+      }
+    }
+    const action = actionData && actionData.action
+    const params = (actionData && actionData.params) || {}
+    switch (action) {
+      case 'openUrl':
+        window.open(params.url, params.target || '_blank')
+        break
+      case 'copy':
+        copyTextToClipboard(params.text)
+        message.success(t('common.copySuccess'))
+        break
+      case 'download':
+        downloadFile(params.url, params.name)
+        break
+      case 'message': {
+        const type = ['info', 'success', 'warning', 'error'].includes(params.type)
+          ? params.type
+          : 'info'
+        message[type](params.content)
+        break
+      }
+      case 'reload':
+        onReload()
+        break
+      default:
+        message.warning('share action 需返回 { action, params } 约定的 JSON 数据')
+    }
+  }
   const onItemActionClick = (item, index) => {
     apidocApi
       .handleApiShareAction({
@@ -187,7 +225,7 @@
       })
       .then((res) => {
         if (res.data) {
-          eval(res.data)
+          dispatchShareAction(res.data)
         }
       })
   }

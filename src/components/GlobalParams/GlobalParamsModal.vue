@@ -8,7 +8,7 @@
     destroyOnClose
     @cancel="onCancel"
   >
-    <a-tabs v-model:visible="state.currentTabKey" @change="onTabChange">
+    <a-tabs v-model:activeKey="state.currentTabKey" @change="onTabChange">
       <a-tab-pane v-for="key in state.paramTypes" :key="key" :tab="t(`globalParam.${key}`)">
         <a-alert
           type="info"
@@ -22,6 +22,7 @@
           :is-add="true"
           @add-row="onAddTableRow(key)"
           @delete-row="onDeleteRow($event, key)"
+          @cell-change="(value, column, record) => onTableChange(value, column, record, key)"
           :scroll="{
             x: '700px',
             y: '200px',
@@ -148,6 +149,10 @@
 
   const onTabChange = () => {}
 
+  const onTableChange = (value: any, column: ColumnItem, record: any, key: string) => {
+    const item = state.globalParams[key].find((p) => p.id === record.id)
+    if (item) item[column.dataIndex] = value
+  }
   const onAddTableRow = (key: string) => {
     state.globalParams[key].push({
       id: createRandKey(),

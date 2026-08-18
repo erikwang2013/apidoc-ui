@@ -1,5 +1,5 @@
 import { useAppOutsideStore } from '/@/store/modules/app/index'
-import { useApidocOutsideStore } from '/@/store/modules/apidoc/index'
+import { useApidocOutsideStore } from '/@/store/modules/Apidoc/index'
 
 import { createRandKey } from '/@/utils/helper'
 

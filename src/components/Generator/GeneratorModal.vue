@@ -181,9 +181,9 @@
               description: message,
             })
           } else {
+            // 无response(超时/断网/跨域)时err.response为空，直接展示err.message
             notification.error({
-              message: err.response.status,
-              description: err.message,
+              message: err.message,
             })
           }
         })

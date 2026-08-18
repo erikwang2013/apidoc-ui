@@ -42,12 +42,16 @@
 
   const onExcute = () => {
     const paramsData = paramsRef.value.getData()
+    state.loading = true
     excuteDebug(props.detail, paramsData, { method: props.currentMethod })
       .then((res) => {
         state.resultData = res
       })
       .catch((err) => {
         state.resultData = err
+      })
+      .finally(() => {
+        state.loading = false
       })
   }
   const reloadParamsAndExcute = () => {

@@ -1,11 +1,5 @@
 <template>
-  <div
-    class="drag-line-x"
-    @mousedown="mouseDown"
-    @mouseup="mouseUp"
-    :style="{ left: lastX + 'px' }"
-  >
-  </div>
+  <div class="drag-line-x" @mousedown="mouseDown" :style="{ left: lastX + 'px' }"></div>
 </template>
 
 <script setup lang="ts">
@@ -27,6 +21,7 @@
 
   const mouseDown = (event: MouseEvent) => {
     document.addEventListener('mousemove', mouseMove)
+    document.addEventListener('mouseup', mouseUp)
     lastX.value = event.screenX
   }
   const mouseMove = (event: MouseEvent) => {
@@ -50,7 +45,12 @@
     }
     emit('mouseUpChange', lastX.value)
     document.removeEventListener('mousemove', mouseMove)
+    document.removeEventListener('mouseup', mouseUp)
   }
+  onBeforeUnmount(() => {
+    document.removeEventListener('mousemove', mouseMove)
+    document.removeEventListener('mouseup', mouseUp)
+  })
 </script>
 <style lang="less" scoped>
   .drag-line-x {

@@ -16,8 +16,8 @@ const authConfig = {
 }
 
 export function handleApidocHttpError(error: any): Promise<any> {
-  return new Promise((resolve, reject) => {
-    if (error.response || (error.status == 200 && error.data)) {
+  return new Promise((resolve) => {
+    if (error.response || (error.status === 200 && error.data)) {
       let status = 200
       let code = 0
       if (error.response) {
@@ -25,7 +25,7 @@ export function handleApidocHttpError(error: any): Promise<any> {
         code = (error.response.data && error.response.data[authConfig.ERROR_CODE_FIELD]) || 0
       } else {
         status = error.status
-        code = error.data.code
+        code = (error.data && error.data[authConfig.ERROR_CODE_FIELD]) || 0
       }
       if (status === authConfig.ERROR_STATUS || [4001, 4002].includes(code)) {
         if (!isShowVerifyAuth) {
@@ -46,13 +46,19 @@ export function handleApidocHttpError(error: any): Promise<any> {
             },
             onCancel: () => {
               isShowVerifyAuth = false
-              reject()
+              // 取消认证视为不需要处理，同时settle队列中等待的Promise，避免挂起/unhandledrejection
+              if (resolveList.length) {
+                for (let i = 0; i < resolveList.length; i++) {
+                  resolveList[i].resolve(false)
+                }
+              }
+              resolveList = []
+              resolve(false)
             },
           })
         } else {
           resolveList.push({
             resolve: resolve,
-            reject: reject,
           })
         }
       } else if (code != 0) {
@@ -63,6 +69,9 @@ export function handleApidocHttpError(error: any): Promise<any> {
         // 返回false表示不需处理的
         resolve(false)
       }
+    } else {
+      // 无response(超时/断网/跨域)时无错误信息可判断，resolve(false)避免Promise永不settle
+      resolve(false)
     }
   })
 }

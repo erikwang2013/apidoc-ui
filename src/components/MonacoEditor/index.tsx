@@ -32,7 +32,6 @@ export default defineComponent({
     const editorRef = shallowRef()
     const containerRef = ref()
     let _subscription: IDisposable | undefined
-    let _hoverId: IDisposable | undefined
     let __prevent_trigger_change_event = false
     function getMonacoEditorTheme(theme: ThemeEnum): MonacoEditorThemeEnum {
       const key = theme.toUpperCase() as 'DARK' | 'LIGHT'
@@ -65,8 +64,12 @@ export default defineComponent({
 
     onBeforeUnmount(() => {
       if (_subscription) _subscription.dispose()
-
-      if (_hoverId) _hoverId.dispose()
+      const editor = editorRef.value
+      if (editor) {
+        const model = editor.getModel()
+        editor.dispose()
+        if (model) model.dispose()
+      }
     })
 
     watch(

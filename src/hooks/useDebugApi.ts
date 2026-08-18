@@ -281,19 +281,25 @@ export default (): Types => {
           .catch((err) => {
             reject(err)
           })
-      } else if (paramsData.body as string) {
-        try {
-          const paramJson = eval('(' + paramsData.body + ')')
-          handleRequestParams(apiDetail, { ...json, body: paramJson }, options)
-            .then((res) => {
-              resolve(res)
-            })
-            .catch((err) => {
-              reject(err)
-            })
-        } catch (error) {
-          reject(t('apiPage.json.formatError'))
+      } else {
+        // 空 body 直接以空对象发送，保证 Promise 一定 settle；非空则严格 JSON 解析
+        let paramJson: any = {}
+        const bodyString = typeof paramsData.body === 'string' ? paramsData.body : ''
+        if (bodyString.trim()) {
+          try {
+            paramJson = JSON.parse(bodyString)
+          } catch (error) {
+            reject(t('apiPage.json.formatError'))
+            return
+          }
         }
+        handleRequestParams(apiDetail, { ...json, body: paramJson }, options)
+          .then((res) => {
+            resolve(res)
+          })
+          .catch((err) => {
+            reject(err)
+          })
       }
     })
   }

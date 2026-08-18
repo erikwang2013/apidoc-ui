@@ -43,7 +43,7 @@
   import { CopyOutlined, CheckOutlined, FullscreenOutlined } from '@ant-design/icons-vue'
   import MonacoEditor from '/@/components/MonacoEditor'
   import { useAppStore } from '/@/store/modules/app'
-  import { useApidocStore } from '/@/store/modules/apidoc'
+  import { useApidocStore } from '/@/store/modules/Apidoc'
   import { copyTextToClipboard } from '/@/utils/helper/index'
   import { debounce } from 'lodash-es'
   const appStore = useAppStore()
@@ -93,6 +93,9 @@
   const onMouseleave = () => {
     apidocStore.setCurrentEditorHoverTipsParams(undefined)
   }
+  onBeforeUnmount(() => {
+    onHover.cancel()
+  })
 </script>
 
 <style lang="less" scoped>

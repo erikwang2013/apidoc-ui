@@ -50,7 +50,7 @@
     title: '',
     loading: false,
     error: {
-      config: {},
+      config: {} as any,
       isAxiosError: false,
       toJSON: () => {
         return {}

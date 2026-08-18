@@ -102,9 +102,21 @@ export function formatJsonCode(jsonObj: objectState): string {
   return JSON.stringify(jsonObj, null, '\t')
 }
 
+// monaco hover 会把 IMarkdownString 当 markdown 渲染，老版本不净化 HTML，
+// desc 是用户可控数据，放入前必须做 HTML 转义
+function escapeHtml(str: string | undefined): string {
+  if (!str) return ''
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
 function renderHoverTipsContent(item: ApiDetailParamItem, t) {
-  const desc = item.desc ? `，${t('apiPage.common.desc')}：${item.desc}` : ''
-  return `${t('apiPage.common.type')}：${item.type}${desc}`
+  const desc = item.desc ? `，${t('apiPage.common.desc')}：${escapeHtml(item.desc)}` : ''
+  return `${t('apiPage.common.type')}：${escapeHtml(item.type)}${desc}`
 }
 
 //将参数处理成editor Hover提示的参数
@@ -135,7 +147,8 @@ export function handleHoverTipsParams(
     }
     tipsParamsByKey[key] = [
       {
-        value: content,
+        // 统一转义，覆盖自定义 RENDER_HOVER_TIPS_CONTENT 返回内容里的 HTML
+        value: escapeHtml(content),
       },
     ]
     if (item.children && item.children.length) {

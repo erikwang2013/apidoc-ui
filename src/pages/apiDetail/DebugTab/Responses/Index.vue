@@ -1,7 +1,7 @@
 <template>
   <div>
     <a-tabs
-      v-model:visible="state.activeTab"
+      v-model:activeKey="state.activeTab"
       type="card"
       size="small"
       :class="[appStore.device]"
@@ -41,7 +41,7 @@
         <template #tab>
           {{ t('debug.event.after') }}
           <number-badge
-            :count="props.detail.after?.length"
+            :count="props.detail.after?.length || 0"
             :type="
               result.afterEvents && result.afterEvents.status
                 ? result.afterEvents.status
@@ -73,6 +73,19 @@
   import { handleHoverTipsParams } from '/@/utils/helper/codeHelper'
 
   const appStore = useAppStore()
+
+  // 转义不可信文本，避免直接v-html注入
+  const escapeHtml = (str: string): string =>
+    str.replace(/[&<>"']/g, (m) => {
+      const map: Record<string, string> = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;',
+      }
+      return map[m]
+    })
 
   const { t } = useI18n()
 
@@ -154,7 +167,7 @@
           }
           if (responsesContent.code) {
             if (typeof responsesContent.code == 'string') {
-              state.responsesHtml += responsesContent.code
+              state.responsesHtml += escapeHtml(responsesContent.code)
             } else {
               state.responsesCode = formatJsonCode(responsesContent.code)
             }
@@ -162,25 +175,29 @@
         }
       } else {
         if (typeof result.data === 'string') {
-          state.responsesHtml = result.data
+          state.responsesHtml = escapeHtml(result.data)
           state.responsesCode = ''
         } else {
           state.responsesHtml = ''
           state.responsesCode = formatJsonCode(result.data)
         }
       }
-    }
-    if (!result.status && !result.response) {
-      state.resultStatus = 'info'
-    } else if (result.status >= 200 && result.status < 300) {
-      state.resultStatus = 'success'
     } else {
+      // 无data(网络错误等)：清空上一次成功的结果，避免误导用户
+      state.responsesHtml = ''
+      state.responsesCode = ''
+    }
+    if (result.status && result.status >= 200 && result.status < 300) {
+      state.resultStatus = 'success'
+    } else if (result.response || result.isAxiosError) {
       state.resultStatus = 'error'
       if (result.response && result.response.data) {
         state.responsesCode = formatJsonCode(result.response.data)
       } else {
         state.responsesCode = formatJsonCode(result)
       }
+    } else {
+      state.resultStatus = 'info'
     }
   })
 </script>

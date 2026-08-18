@@ -336,6 +336,14 @@ const events: EventItem = {
           .catch((err) => {
             reject(err)
           })
+      } else {
+        // 事件未配置url，resolve明确错误提示，避免Promise永不settle导致调试请求挂起
+        const res: EventResult = {
+          event,
+          config,
+          message: 'ajax event 未配置 url，已跳过',
+        }
+        resolve(res)
       }
     })
   },

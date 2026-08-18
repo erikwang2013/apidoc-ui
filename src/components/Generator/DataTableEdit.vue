@@ -27,6 +27,7 @@
       }"
       @add-row="onAddTableRow"
       @delete-row="onDeleteRow"
+      @cell-change="onTableChange"
     />
   </div>
 </template>
@@ -61,7 +62,7 @@
   )
 
   interface CurrentAlert {
-    type: string
+    type: 'success' | 'info' | 'warning' | 'error'
     message: string
   }
 
@@ -225,6 +226,11 @@
 
   function onDeleteRow(record: any) {
     state.currentData = state.currentData.filter((p) => p.id !== record.id)
+  }
+
+  function onTableChange(value: any, column: ColumnItem, record: any) {
+    const item = state.currentData.find((p) => p.id === record.id)
+    if (item) item[column.dataIndex] = value
   }
 
   function onAddTableRow() {

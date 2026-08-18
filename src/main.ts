@@ -4,7 +4,6 @@ import router from './router'
 import piniaStore from './store'
 import './assets/icons/iconfont/iconfont.css'
 import './styles/index.less'
-import 'ant-design-vue/dist/antd.less'
 
 import 'ant-design-vue/es/message/style/css'
 

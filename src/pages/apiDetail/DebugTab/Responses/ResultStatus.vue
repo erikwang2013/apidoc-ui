@@ -36,7 +36,7 @@
   const props = withDefaults(
     defineProps<{
       result: any
-      resultStatus: string
+      resultStatus: 'success' | 'error' | 'info'
     }>(),
     {},
   )

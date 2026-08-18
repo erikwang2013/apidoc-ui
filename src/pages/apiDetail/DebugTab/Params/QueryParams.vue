@@ -5,6 +5,7 @@
     :is-add="true"
     @add-row="onAddTableRow"
     @delete-row="onDeleteRow"
+    @cell-change="(value, column, record) => emit('cellChange', value, column, record)"
     :scroll="{
       x: '700px',
       y: '170px',
@@ -27,6 +28,7 @@
   const emit = defineEmits<{
     (event: 'addRow'): void
     (event: 'deleteRow', row: any): void
+    (event: 'cellChange', value: any, column: ColumnItem, record: any): void
   }>()
 
   const columns: ColumnItem[] = [

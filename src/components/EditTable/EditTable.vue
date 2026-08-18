@@ -7,6 +7,7 @@
       :data-source="props.data"
       :columns="props.columns"
       :scroll="props.scroll"
+      :row-key="(record: any) => record.id"
     >
       <template #bodyCell="{ column, text, record }">
         <div class="edit-item-wraper">
@@ -30,7 +31,6 @@
               :value="text"
               v-bind="column.itemRender.props"
               @change="onCellChange($event, column, record)"
-              @select="onAutoCompleteSelect($event, column, record)"
             />
           </template>
           <template v-else-if="column.itemRender && column.itemRender.name === 'select'">
@@ -63,7 +63,6 @@
             <a-button type="link" v-if="record.require !== true" danger @click="onDeleteRow(record)"
               ><DeleteOutlined
             /></a-button>
-            <span else></span>
           </template>
           <template v-else-if="column.itemRender && column.itemRender.name === 'check-status'">
             <CheckOutlined v-if="text && text == 1" />
@@ -153,6 +152,7 @@
   const emit = defineEmits<{
     (event: 'deleteRow', record: any): void
     (event: 'addRow'): void
+    (event: 'cellChange', value: any, column: ColumnItem, record: any): void
   }>()
 
   function onCellChange(e: any, column: ColumnItem, record: any) {
@@ -172,10 +172,7 @@
         value = e
         break
     }
-    record[column.dataIndex] = value
-  }
-  function onAutoCompleteSelect(e: any, column: ColumnItem, record: any) {
-    console.log(e, column, record)
+    emit('cellChange', value, column, record)
   }
   const onDeleteRow = (record: any) => {
     emit('deleteRow', record)
@@ -188,18 +185,20 @@
     name: string
   }
   function fileBeforeUpload(file: UploadFileState, record: any, column: any): void {
+    let value: UploadFileState[]
     if (record.type === 'files' && record[column.dataIndex] && record[column.dataIndex].length) {
-      record[column.dataIndex].push(file)
+      value = [...record[column.dataIndex], file]
     } else {
-      record[column.dataIndex] = [file]
+      value = [file]
     }
+    emit('cellChange', value, column, record)
   }
   function fileHandleRemove(file: UploadFileState, record: any, column: any): void {
     let fileList = record[column.dataIndex]
     const index = fileList.indexOf(file)
     const newFileList = fileList.slice()
     newFileList.splice(index, 1)
-    record[column.dataIndex] = newFileList
+    emit('cellChange', newFileList, column, record)
   }
 </script>
 

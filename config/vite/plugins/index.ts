@@ -10,16 +10,11 @@ import { AutoRegistryComponents } from './component'
 import { AutoImportDeps } from './autoImport'
 import { ConfigVisualizerConfig } from './visualizer'
 import { ConfigCompressPlugin } from './compress'
-import { ConfigRestartPlugin } from './restart'
 import { ThemePreprocessor } from './theme'
 import { themePreprocessorHmrPlugin } from '@zougt/vite-plugin-theme-preprocessor'
-import monacoEditorPlugin from 'vite-plugin-monaco-editor'
 import { createHtmlPlugin } from 'vite-plugin-html'
 
-import OptimizationPersist from 'vite-plugin-optimize-persist'
-import PkgConfig from 'vite-plugin-package-config'
-
-const APP_VERSION = require('../../../package.json').version
+import { version as APP_VERSION } from '../../../package.json'
 
 export function createVitePlugins(isBuild: boolean) {
   const vitePlugins: (Plugin | Plugin[])[] = [
@@ -31,22 +26,12 @@ export function createVitePlugins(isBuild: boolean) {
     AutoRegistryComponents(),
     // 自动按需引入依赖
     AutoImportDeps(),
-    // 开启.gz压缩  rollup-plugin-gzip
+    // 开启.gz/.br压缩
     ConfigCompressPlugin(),
-    // 监听配置文件改动重启
-    ConfigRestartPlugin(),
-    // 代码编辑器
-    monacoEditorPlugin({
-      languageWorkers: ['editorWorkerService', 'json', 'typescript'],
-    }),
-    // 预加载配置
-    PkgConfig(),
-    //预加载
-    OptimizationPersist(),
     // 主题
     ThemePreprocessor(),
-    // 主题热更新
-    themePreprocessorHmrPlugin(),
+    // 主题热更新（仅开发模式；其 watcher 会让构建进程无法退出）
+    ...(isBuild ? [] : [themePreprocessorHmrPlugin()]),
     createHtmlPlugin({
       inject: {
         data: {

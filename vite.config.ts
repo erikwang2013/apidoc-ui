@@ -1,4 +1,4 @@
-import { UserConfig, ConfigEnv } from 'vite'
+import { UserConfig, ConfigEnv, loadEnv } from 'vite'
 import { createVitePlugins } from './config/vite/plugins'
 import { resolve } from 'path'
 import { VITE_DROP_CONSOLE, VITE_PORT } from './config/constant'
@@ -8,18 +8,15 @@ function pathResolve(dir: string) {
 }
 
 // https://vitejs.dev/config/
-export default ({ command }: ConfigEnv): UserConfig => {
+export default ({ command, mode }: ConfigEnv): UserConfig => {
   const isBuild = command === 'build'
-  //环境变量
+  // 加载环境变量到 process.env，供 config/constant.ts 读取
+  Object.assign(process.env, loadEnv(mode, process.cwd(), ''))
 
   return {
     base: './',
     resolve: {
       alias: [
-        {
-          find: 'vue-i18n',
-          replacement: 'vue-i18n/dist/vue-i18n.cjs.js',
-        },
         {
           find: /\/@\//,
           replacement: pathResolve('src') + '/',
@@ -52,27 +49,40 @@ export default ({ command }: ConfigEnv): UserConfig => {
       host: '0.0.0.0', // IP配置，支持从IP启动
     },
 
+    // esbuild（顶层选项，构建与预构建共用）
+    esbuild: {
+      drop: VITE_DROP_CONSOLE ? ['console'] : undefined,
+    },
+
     // build
     build: {
       outDir: 'apidoc',
-      minify: 'terser',
-      target: 'es2015',
-      terserOptions: {
-        compress: {
-          keep_infinity: true,
-          drop_console: VITE_DROP_CONSOLE,
-        },
-      },
+      minify: 'esbuild',
+      target: 'es2018',
       rollupOptions: {
         // 确保外部化处理那些不想打包进库的依赖
         external: [],
-        // https://rollupjs.org/guide/en/#big-list-of-options
-      },
-      watch: {
-        // https://rollupjs.org/guide/en/#watch-options
+        output: {
+          manualChunks: {
+            antd: ['ant-design-vue', '@ant-design/icons-vue'],
+            monaco: ['monaco-editor'],
+            vendor: [
+              'vue',
+              'vue-router',
+              'pinia',
+              'vue-i18n',
+              'axios',
+              'lodash-es',
+              'marked',
+              'highlight.js',
+              'nprogress',
+              'js-md5',
+              'mockjs',
+            ],
+          },
+        },
       },
       // Turning off brotliSize display can slightly reduce packaging time
-      brotliSize: false,
       chunkSizeWarningLimit: 2000,
       cssTarget: 'chrome83',
     },

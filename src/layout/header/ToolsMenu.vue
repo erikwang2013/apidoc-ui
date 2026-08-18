@@ -48,12 +48,10 @@
   import { useI18n } from '/@/hooks/useI18n'
   import { MenuInfo } from 'ant-design-vue/lib/menu/src/interface'
   import { AppstoreOutlined, DownOutlined } from '@ant-design/icons-vue'
-  import showGeneratorModal from '/@/components/Generator'
   import apidocApi from '/@/api/apidocApi'
   import { message, Modal } from 'ant-design-vue'
   import ConfirmModal from '/@/components/ConfirmModal'
   import { DeviceEnum } from '/@/enums/appEnum'
-  import showCodeTemplateModal from '/@/components/CodeTemplate'
   import showApiShareModal from '/@/components/ApiShare'
 
   const appStore = useAppStore()
@@ -64,7 +62,7 @@
     (event: 'reloadMenu'): void
   }>()
 
-  const handleMenuClick = (e: MenuInfo) => {
+  const handleMenuClick = async (e: MenuInfo) => {
     const { keyPath, key } = e
 
     if (!(keyPath && keyPath.length)) {
@@ -72,6 +70,7 @@
     }
     if (keyPath[0] == 'generator') {
       const index = Number(keyPath[1])
+      const { default: showGeneratorModal } = await import('/@/components/Generator')
       showGeneratorModal({
         generatorIndex: index,
         onSuccess: () => {
@@ -106,6 +105,7 @@
         },
       })
     } else if (key == 'codeTemplate') {
+      const { default: showCodeTemplateModal } = await import('/@/components/CodeTemplate')
       showCodeTemplateModal({})
     } else if (key == 'apiShare') {
       showApiShareModal({})

@@ -91,31 +91,30 @@
     return newPath
   }
 
-  watchEffect(() => {
-    // let data: any = []
-    if (props.files && props.files.length) {
-      // for (let i = 0; i < props.files.length; i++) {
-      //   const item: ConfigGeneratorItemFilesItem = props.files[i]
-      //   data.push({
-      //     name: item.name,
-      //     value: '',
-      //     path: replacePathParam(item.path),
-      //   })
-      // }
-      reloadPath()
-    } else {
-      state.fileDatas = []
-    }
-  })
+  watch(
+    () => props.files,
+    () => {
+      if (props.files && props.files.length) {
+        reloadPath()
+      } else {
+        state.fileDatas = []
+      }
+    },
+    { immediate: true },
+  )
 
   function reloadPath() {
     let data: any = []
     if (props.files && props.files.length) {
+      const oldValues: ObjectType<any> = {}
+      state.fileDatas.forEach((p) => {
+        oldValues[p.name] = p.value
+      })
       for (let i = 0; i < props.files.length; i++) {
         const item: ConfigGeneratorItemFilesItem = props.files[i]
         data.push({
           name: item.name,
-          value: '',
+          value: oldValues[item.name] || '',
           path: replacePathParam(item.path),
         })
       }

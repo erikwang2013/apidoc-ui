@@ -3,6 +3,7 @@
     :columns="headersColumns"
     :data="props.data"
     :is-add="false"
+    @cell-change="(value, column, record) => emit('cellChange', value, column, record)"
     :scroll="{
       x: '500px',
       y: '180px',
@@ -23,6 +24,9 @@
     }>(),
     {},
   )
+  const emit = defineEmits<{
+    (event: 'cellChange', value: any, column: ColumnItem, record: any): void
+  }>()
   const headersColumns: ColumnItem[] = [
     {
       title: t('apiPage.common.field'),

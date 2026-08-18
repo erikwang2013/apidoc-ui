@@ -27,7 +27,7 @@
                       ><a-tag style="width: 50px">Before</a-tag
                       >{{ t(`debug.event.${ajaxEventItem.event}`) }}：</span
                     >
-                    <span v-if="item.handleValue"
+                    <span v-if="ajaxEventItem.handleValue"
                       >{{ ajaxEventItem.key }} = {{ ajaxEventItem.handleValue }}({{
                         ajaxEventItem.value
                       }})</span
@@ -52,7 +52,7 @@
                       ><a-tag style="width: 50px">After</a-tag
                       >{{ t(`debug.event.${ajaxEventItem.event}`) }}：</span
                     >
-                    <span v-if="item.handleValue"
+                    <span v-if="ajaxEventItem.handleValue"
                       >{{ ajaxEventItem.key }} = {{ ajaxEventItem.handleValue }}({{
                         ajaxEventItem.value
                       }})</span
@@ -69,7 +69,7 @@
                 >{{ item.key }} {{ item.value || item.realValue ? '=' : '' }}
                 {{ item.realValue ? item.realValue : item.value }}</span
               >
-              <span v-if="item.message" v-html="item.message"></span>
+              <span v-if="item.message" v-html="textToHtml(item.message)"></span>
             </template>
           </a-badge>
         </a-list-item>
@@ -80,6 +80,7 @@
 
 <script setup lang="ts">
   import { useI18n } from '/@/hooks/useI18n'
+  import { textToHtml } from '/@/utils/helper'
 
   import { ApiDetailEventItem } from '/@/api/apidocApi/types'
 

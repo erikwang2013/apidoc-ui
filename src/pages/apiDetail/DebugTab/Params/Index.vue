@@ -6,14 +6,14 @@
   >
     <a-tabs v-model:activeKey="state.activeTab" type="card" size="small">
       <a-tab-pane :key="ParamTypeEnum.HEADER" :tab="t('apiPage.debug.header')">
-        <header-params ref="headerRef" :data="state.headerData" />
+        <header-params ref="headerRef" :data="state.headerData" @cell-change="onHeaderCellChange" />
       </a-tab-pane>
       <a-tab-pane
         v-if="state.routeData && state.routeData.length"
         :key="ParamTypeEnum.ROUTEPARAM"
         :tab="t('apiPage.debug.routeParam')"
       >
-        <route-params ref="routeRef" :data="state.routeData" />
+        <route-params ref="routeRef" :data="state.routeData" @cell-change="onRouteCellChange" />
       </a-tab-pane>
       <a-tab-pane :key="ParamTypeEnum.QUERY" :tab="t('apiPage.debug.query')">
         <query-params
@@ -21,6 +21,7 @@
           :data="state.queryData"
           @add-row="onAddQueryTableRow"
           @delete-row="onDeleteQueryTableRow"
+          @cell-change="onQueryCellChange"
         />
       </a-tab-pane>
 
@@ -36,6 +37,7 @@
           @change="onBodyDataChange"
           @add-row="onAddBodyTableRow"
           @delete-row="onDeleteBodyTableRow"
+          @cell-change="onBodyCellChange"
         />
       </a-tab-pane>
       <template #rightExtra>
@@ -143,6 +145,22 @@
     state.bodyData = data
   }
 
+  const updateCell = (rows: ApiDetailParamItem[], value: any, column: any, record: any) => {
+    const item = rows.find((p) => p.id === record.id)
+    if (item) item[column.dataIndex] = value
+  }
+  const onHeaderCellChange = (value: any, column: any, record: any) =>
+    updateCell(state.headerData, value, column, record)
+  const onRouteCellChange = (value: any, column: any, record: any) =>
+    updateCell(state.routeData, value, column, record)
+  const onQueryCellChange = (value: any, column: any, record: any) =>
+    updateCell(state.queryData, value, column, record)
+  const onBodyCellChange = (value: any, column: any, record: any) => {
+    if (typeof state.bodyData != 'string') {
+      updateCell(state.bodyData, value, column, record)
+    }
+  }
+
   const getData = () => {
     return {
       header: state.headerData,
@@ -178,7 +196,13 @@
           const stateKey = key == 'routeParam' ? 'route' : key
           state[`${stateKey}Data`] = newParams
         } else if (typeof itemParams == 'string') {
-          let bodyJson = JSON.parse(itemParams)
+          let bodyJson: any
+          try {
+            bodyJson = JSON.parse(itemParams)
+          } catch (e) {
+            // 用户输入非法JSON时跳过body合并，避免中断全局参数合并
+            return
+          }
           for (const key in bodyJson) {
             const paramKey = `${props.detail.appKey}_${key}`
             const allKey = `all_${key}`

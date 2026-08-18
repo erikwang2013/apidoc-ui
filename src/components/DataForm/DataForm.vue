@@ -117,16 +117,16 @@
     formData: {},
   })
 
-  const handleFormData = (data: ObjectType<any>) => {
+  watchEffect(() => {
+    const data = props.data as ObjectType<any>
     let formData = {}
     for (const key in data) {
       formData[key] = data[key]
     }
-    state.formData = formData
-  }
-
-  watchEffect(() => {
-    handleFormData(props.data as ObjectType<any>)
+    // 与当前 formData 相同则跳过，避免任意字段输入触发整表单重渲染
+    if (JSON.stringify(formData) !== JSON.stringify(state.formData)) {
+      state.formData = formData
+    }
   })
 
   const onAppChange = (value: string, item: FormItemType) => {
@@ -134,7 +134,7 @@
     item.onChange && item.onChange(value)
     onChange(value, item)
   }
-  const onValueChange = (value: string, item: FormItemType) => {
+  const onValueChange = (value: any, item: FormItemType) => {
     state.formData[item.field] = value
     item.onChange && item.onChange(value)
     onChange(value, item)

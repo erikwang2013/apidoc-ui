@@ -18,7 +18,7 @@ export const handleTableDataRowKey = (data: any[]): any[] => {
 }
 
 // 根据前17位生成末位
-export const createIdcardEndNumber = (idcard: string): string | number => {
+const createIdcardEndNumber = (idcard: string): string | number => {
   const arrExp = [7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2] // 加权因子
   const arrValid = [1, 0, 'X', 9, 8, 7, 6, 5, 4, 3, 2] // 校验码
   let sum = 0
@@ -30,7 +30,7 @@ export const createIdcardEndNumber = (idcard: string): string | number => {
 }
 
 // 生成随机数字，max限制最大值，min限制最小值
-export const getRandomNumber = (max: number, min?: number): number => {
+const getRandomNumber = (max: number, min?: number): number => {
   return Math.floor(Math.random() * max + (min ? min : 0))
 }
 
@@ -129,12 +129,21 @@ export const copyTextToClipboard = (text: string): boolean => {
 }
 
 /**
- * 将文本内的特殊标记替换成html
+ * 将纯文本转义后替换特殊标记成html
+ * 先做 HTML 转义防止注入，再替换空格/换行
  * @param {string} text
  * @returns
  */
 export const textToHtml = (text: string): string => {
-  return text ? text.replace(/ /g, '&nbsp;').replace(/\r\n/g, '<br>') : ''
+  if (!text) return ''
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .replace(/ /g, '&nbsp;')
+    .replace(/\r\n/g, '<br>')
 }
 
 // 获取对象中指定key的值
@@ -152,35 +161,6 @@ export const getObjectValueByKey = (key: string, obj: ObjectType<any>): any => {
     value = value[key]
   }
   return value
-}
-
-//  设置对象中指定key的值
-export const setObjectValueByKey = (obj: ObjectType<any>, key: string, value: string): any => {
-  const res = obj
-  if (key && key.indexOf('.') > -1) {
-    const keysArr = key.split('.')
-    let find = res
-    for (let i = 0; i < keysArr.length; i++) {
-      const k = keysArr[i]
-      if (i >= keysArr.length - 1 && find[k]) {
-        find[k] = value
-      } else if (find[k]) {
-        find = find[k]
-      }
-    }
-  } else if (key && res[key]) {
-    res[key] = value
-  }
-  return res
-}
-
-/**
- * 首字母大写
- * @param str
- * @returns
- */
-export const firstToUpperCase = (str: string): string => {
-  return str.slice(0, 1).toUpperCase() + str.slice(1).toLowerCase()
 }
 
 /**

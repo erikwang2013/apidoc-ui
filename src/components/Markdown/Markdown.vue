@@ -7,6 +7,7 @@
 
   import 'highlight.js/styles/github.css'
   import { marked } from 'marked'
+  import DOMPurify from 'dompurify'
   import hljs from 'highlight.js/lib/core'
   import javascript from 'highlight.js/lib/languages/javascript'
   import json from 'highlight.js/lib/languages/json'
@@ -31,7 +32,8 @@
     setup(props) {
       const mdHtml = ref('')
       watchEffect(() => {
-        mdHtml.value = marked(props.md)
+        // marked 输出经 DOMPurify 净化后再 v-html，防止 markdown 内嵌 HTML/脚本执行
+        mdHtml.value = DOMPurify.sanitize(marked(props.md))
       })
 
       return { mdHtml }

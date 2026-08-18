@@ -12,7 +12,7 @@ import { loadStyle } from '/@/utils/helper/loadStyle'
 
 import { toggleTheme } from '@zougt/vite-plugin-theme-preprocessor/dist/browser-utils'
 import { handleApps } from './helper'
-import { useApidocOutsideStore } from '/@/store/modules/apidoc/index'
+import { useApidocOutsideStore } from '/@/store/modules/Apidoc/index'
 
 declare const apidocFeConfig: FeConfig
 
@@ -39,7 +39,7 @@ export const useAppStore = defineStore('app', {
     keepAliveKeys: [],
     appAuth: {},
     globalError: {
-      config: {},
+      config: {} as any,
       isAxiosError: false,
       toJSON: () => {
         return {}
