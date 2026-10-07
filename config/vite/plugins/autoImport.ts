@@ -8,14 +8,7 @@ import { AntDesignVueResolver } from 'unplugin-vue-components/resolvers'
 export const AutoImportDeps = () => {
   return AutoImport({
     dts: 'types/auto-imports.d.ts',
-    imports: [
-      'vue',
-      'pinia',
-      'vue-router',
-      {
-        '@vueuse/core': [],
-      },
-    ],
+    imports: ['vue', 'pinia', 'vue-router'],
     resolvers: [AntDesignVueResolver({ importStyle: 'less' })],
   })
 }

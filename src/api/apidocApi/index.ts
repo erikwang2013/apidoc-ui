@@ -40,7 +40,6 @@ export enum URL {
   getApiShareList = '/getApiShareList',
   getApiShareDetail = '/getApiShareDetail',
   deleteApiShare = '/deleteApiShare',
-  getShareApiMenus = '/getShareApiMenus',
   handleApiShareAction = '/handleApiShareAction',
   exportSwagger = '/exportSwagger',
   exportAllData = '/exportAllData',
@@ -82,8 +81,6 @@ export default class globalApi {
     post<ApiShareListItem>({ url: URL.getApiShareDetail, data })
   static deleteApiShare = async (data: GetApiShareDetailParams) =>
     post<ApiShareListItem>({ url: URL.deleteApiShare, data })
-  static getShareApiMenus = async (data: ApiMenusParams) =>
-    post<ApiMenusResult>({ url: URL.getShareApiMenus, data })
   static handleApiShareAction = async (data: HandleApiShareActionParams) =>
     post<any>({ url: URL.handleApiShareAction, data })
   static exportSwagger = async (data: ExportSwaggerParams) =>

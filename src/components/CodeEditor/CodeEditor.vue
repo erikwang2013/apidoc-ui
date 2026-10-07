@@ -45,7 +45,27 @@
   import { useAppStore } from '/@/store/modules/app'
   import { useApidocStore } from '/@/store/modules/Apidoc'
   import { copyTextToClipboard } from '/@/utils/helper/index'
-  import { debounce } from 'lodash-es'
+
+  // 本地防抖，等价于原 lodash debounce 默认行为（仅 trailing 调用），保留 cancel 用于卸载清理
+  function debounce<T extends (...args: any[]) => void>(fn: T, wait: number) {
+    let timer: ReturnType<typeof setTimeout> | undefined
+    return Object.assign(
+      (...args: Parameters<T>) => {
+        if (timer) clearTimeout(timer)
+        timer = setTimeout(() => {
+          timer = undefined
+          fn(...args)
+        }, wait)
+      },
+      {
+        cancel: () => {
+          if (timer) clearTimeout(timer)
+          timer = undefined
+        },
+      },
+    )
+  }
+
   const appStore = useAppStore()
   const apidocStore = useApidocStore()
 

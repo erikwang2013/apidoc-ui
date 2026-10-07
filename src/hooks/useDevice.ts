@@ -1,5 +1,4 @@
-import { ref, Ref } from 'vue'
-import { useMediaQuery } from '@vueuse/core'
+import { ref, Ref, onMounted, onUnmounted } from 'vue'
 import { DeviceEnum } from '/@/enums/appEnum'
 import { useAppStore } from '/@/store/modules/app'
 
@@ -8,14 +7,17 @@ interface Types {
 }
 export default (): Types => {
   const appStore = useAppStore()
-  const isMobile = useMediaQuery('(max-width: 1024px)')
-  const device = ref(setDevice(isMobile.value))
-  watch(
-    () => isMobile.value,
-    (is) => {
-      device.value = setDevice(is)
-    },
-  )
+  const mediaQuery = window.matchMedia('(max-width: 1024px)')
+  const device = ref(setDevice(mediaQuery.matches))
+  const onMediaChange = (e: MediaQueryListEvent) => {
+    device.value = setDevice(e.matches)
+  }
+  onMounted(() => {
+    mediaQuery.addEventListener('change', onMediaChange)
+  })
+  onUnmounted(() => {
+    mediaQuery.removeEventListener('change', onMediaChange)
+  })
   function setDevice(is: boolean) {
     const deviceCode = is === true ? DeviceEnum.MOBILE : DeviceEnum.DESKTOP
     appStore.setDevice(deviceCode)

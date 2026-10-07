@@ -20,12 +20,6 @@
             />
           </template>
           <template v-else-if="column.itemRender && column.itemRender.name === 'auto-complete'">
-            <!-- <a-input-number
-              class="edit-item"
-              :value="text"
-              v-bind="column.itemRender.props"
-              @change="onCellChange($event, column, record)"
-            /> -->
             <a-auto-complete
               class="edit-item"
               :value="text"

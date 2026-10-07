@@ -1,8 +1,7 @@
 import { ObjectType } from '/#/index'
 import { ApiDetailEventItem, ApiDebugEventName } from '/@/api/apidocApi/types'
 import { FeConfig } from '/@/store/modules/app/types'
-import { getObjectValueByKey } from '/@/utils/helper'
-import { isArray, isObject, cloneDeep } from 'lodash-es'
+import { getObjectValueByKey, deepClone } from '/@/utils/helper'
 import request from '/@/utils/http/axios'
 import { AxiosRequestConfig } from 'axios'
 import { IResponse } from '/@/utils/http/axios/type'
@@ -272,7 +271,7 @@ const events: EventItem = {
           }
         }
 
-        if (event.before && isArray(event.before)) {
+        if (event.before && Array.isArray(event.before)) {
           for (let i = 0; i < event.before.length; i++) {
             const item = event.before[i]
             let itemValue = item.value
@@ -296,7 +295,7 @@ const events: EventItem = {
             } else if (item.event === 'setHeader') {
               if (item.key) {
                 ajaxOptions.headers[item.key] = encodeURIComponent(itemValue)
-              } else if (isObject(itemValue)) {
+              } else if (typeof itemValue === 'object' && itemValue !== null) {
                 ajaxOptions.headers = itemValue
               }
             }
@@ -307,7 +306,7 @@ const events: EventItem = {
 
         request(ajaxOptions)
           .then((ajaxRes) => {
-            if (event.after && isArray(event.after)) {
+            if (event.after && Array.isArray(event.after)) {
               for (let i = 0; i < event.after.length; i++) {
                 const item = event.after[i]
                 let itemValue = item.value
@@ -369,9 +368,9 @@ export function handleRequestEvent(
       const item = eventList[i]
       let value: any = item.value
       if (item.value && item.value?.indexOf('params.') > -1) {
-        value = getObjectValueByKey(item.value, { params: cloneDeep(config.params) })
+        value = getObjectValueByKey(item.value, { params: deepClone(config.params) })
       } else if (item.value && item.value?.indexOf('body.') > -1) {
-        value = getObjectValueByKey(item.value, { body: cloneDeep(config.data) })
+        value = getObjectValueByKey(item.value, { body: deepClone(config.data) })
       } else if (item.value && item.value?.indexOf('res.') > -1) {
         value = getObjectValueByKey(item.value, { res: res })
       }

@@ -18,7 +18,7 @@
   import BasicSubMenuItem from './BasicSubMenuItem.vue'
 
   import { filterTree, getTreePath, getTreeValueByField } from '/@/utils/helper/treeHelper'
-  import { cloneDeep } from 'lodash-es'
+  import { deepClone } from '/@/utils/helper'
   import { ApiMenuItem } from '/@/api/apidocApi/types'
   import { useAppStore } from '/@/store/modules/app'
   const appStore = useAppStore()
@@ -76,7 +76,7 @@
   }
 
   const handleMenuData = (data: ApiMenuItem[], keyword?: string, tags?: string[]) => {
-    let menuList = cloneDeep(data)
+    let menuList = deepClone(data)
     if (keyword || tags?.length) {
       menuList = filterTree<ApiMenuItem>(
         menuList,

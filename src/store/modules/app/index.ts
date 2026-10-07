@@ -53,11 +53,6 @@ export const useAppStore = defineStore('app', {
   }),
   getters: {},
   actions: {
-    // Update app settings
-    updateSettings(partial: Partial<AppState>) {
-      // @ts-ignore-next-line
-      this.$patch(partial)
-    },
     fetchFeConfig() {
       this.feConfig = apidocFeConfig
       if (this.feConfig.LOAD_SCRIPTS && this.feConfig.LOAD_SCRIPTS.length) {

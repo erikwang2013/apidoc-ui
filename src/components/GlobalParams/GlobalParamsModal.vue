@@ -43,8 +43,7 @@
   import { useI18n } from '/@/hooks/useI18n'
   import { ConfigGlobalParams } from '/@/api/globalApi/types'
 
-  import { createRandKey } from '/@/utils/helper'
-  import { cloneDeep } from 'lodash-es'
+  import { createRandKey, deepClone } from '/@/utils/helper'
 
   const { t } = useI18n()
 
@@ -75,7 +74,7 @@
     visible: false,
     currentTabKey: 'header',
     paramTypes: ['header', 'query', 'body'],
-    globalParams: cloneDeep(apidocStore.globalParams),
+    globalParams: deepClone(apidocStore.globalParams),
     columns: [
       {
         title: t('common.appOrVersion'),
@@ -136,16 +135,6 @@
     props.onCancel && props.onCancel()
     state.visible = false
   }
-
-  // const handleDelete = () => {
-  //   state.globalParams = {
-  //     header: [],
-  //     query: [],
-  //     body: [],
-  //   }
-
-  //   apidocStore.setGlobalParams(state.globalParams)
-  // }
 
   const onTabChange = () => {}
 

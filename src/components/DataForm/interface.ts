@@ -27,7 +27,7 @@ export enum FormInputType {
   RADIOGROUP = 'radioGroup',
 }
 
-export type FormItemTypes =
+type FormItemTypes =
   | FormInputType.INPUT
   | FormInputType.SELECT
   | FormInputType.APPSELECT

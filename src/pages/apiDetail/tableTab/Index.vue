@@ -79,11 +79,10 @@
 </template>
 
 <script setup lang="ts">
-  import { textToHtml } from '/@/utils/helper'
+  import { textToHtml, deepClone } from '/@/utils/helper'
   import { ApiDetailResult } from '/@/api/apidocApi/types'
   import TableCard from './TableCard.vue'
   import { useI18n } from '/@/hooks/useI18n'
-  import { cloneDeep } from 'lodash-es'
   import Markdown from '/@/components/Markdown'
   import { useAppStore } from '/@/store'
 
@@ -127,7 +126,7 @@
     },
   ]
 
-  const returnColumns = cloneDeep(paramsColumns)
+  const returnColumns = deepClone(paramsColumns)
   const requireColIndex = returnColumns.findIndex((p) => p.dataIndex === 'require')
   returnColumns[requireColIndex].title = t('common.notEmpty')
 

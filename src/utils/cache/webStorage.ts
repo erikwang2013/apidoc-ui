@@ -18,22 +18,9 @@ export const createStorage = ({
     private getKey(key: string) {
       return `${this.prefixKey}${key}`.toUpperCase()
     }
-    /**
-     *
-     * @param {string} key
-     * @param {*} value
-     * @param {number} expire  Expiration time in seconds
-     * @memberof Cache
-     */
     // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-    set(key: string, value: any, expire: number | null = null): void {
-      const stringData = JSON.stringify({
-        value,
-        time: Date.now(),
-        expire: expire ? new Date().getTime() + expire * 1000 : null,
-      })
-
-      this.storage.setItem(this.getKey(key), stringData)
+    set(key: string, value: any): void {
+      this.storage.setItem(this.getKey(key), JSON.stringify(value))
     }
     get(key: string, def: any = null): any {
       const val = this.storage.getItem(this.getKey(key))
@@ -41,11 +28,11 @@ export const createStorage = ({
 
       try {
         const data = JSON.parse(val)
-        const { value, expire } = data
-        if (!expire || expire >= new Date().getTime()) {
-          return value
+        // 兼容旧格式（曾是 {value,time,expire} 包装），可在一个版本后删除
+        if (data && typeof data === 'object' && 'value' in data && 'time' in data) {
+          return data.value
         }
-        this.remove(key)
+        return data
       } catch (e) {
         return def
       }

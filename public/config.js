@@ -2,6 +2,8 @@
 window.apidocFeConfig = {
   // 标题
   TITLE: "Apidoc",
+  // 是否显示版本号（首页底部）
+  SHOW_VERSION: true,
   // 缓存配置
   CACHE: {
     // 缓存前缀
@@ -29,7 +31,6 @@ window.apidocFeConfig = {
   // 菜单配置
   MENU: {
     SHOWURL: false,
-    WIDTH: 300,
   },
   // 请求类型的颜色
   METHOD_COLOR: {
@@ -43,8 +44,6 @@ window.apidocFeConfig = {
   API_DETAIL_TABS:["table", "json", "ts", "debug"],
   // 接口详情表格属性
   API_TABLE_PROPS:{
-    // 是否默认展开所有行
-    defaultExpandAllRows:true
   },
   // 加载外部js文件
   LOAD_SCRIPTS:[

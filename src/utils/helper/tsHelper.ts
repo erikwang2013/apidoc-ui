@@ -28,7 +28,7 @@ interface ConfigType {
   childrenType?: string
 }
 
-export function transformTsByParams<T>(params: T[], config: ConfigType): any[] {
+function transformTsByParams<T>(params: T[], config: ConfigType): any[] {
   let result = ''
   let subs = ''
   const padContent = pad(config.outputIndent)
@@ -79,18 +79,6 @@ export function transformTsByParams<T>(params: T[], config: ConfigType): any[] {
   }
 
   return [result, subs]
-}
-
-/**
- * 获取指定数量的空格
- * @param {int} indent
- */
-export function getIndent(indent: number): string {
-  let string = ''
-  for (let i = 0; i < indent; i++) {
-    string += '\xa0'
-  }
-  return string
 }
 
 export function transformTypeScript<T>(params: T[], config = {}) {

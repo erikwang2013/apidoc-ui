@@ -187,15 +187,6 @@
         shareKey: query.shareKey ? (query.shareKey as string) : appStore.shareKey,
       })
       .then((res: IResponse<ApiDetailResult>) => {
-        // if (res.code != 0) {
-        //   const err: any = res
-        //   err.response = {
-        //     data: res,
-        //   }
-        //   state.error = err
-        //   state.loading = false
-        //   return
-        // }
         let data = res.data
         if (data.query) {
           data.query = handleTableDataRowKey(data.query)

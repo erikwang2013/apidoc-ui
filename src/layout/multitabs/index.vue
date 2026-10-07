@@ -42,7 +42,6 @@
   import { useRoute, useRouter, onBeforeRouteUpdate, RouteLocationNormalized } from 'vue-router'
 
   import { useI18n } from '/@/hooks/useI18n'
-  import { isString } from 'lodash-es'
   import { message } from 'ant-design-vue'
 
   const appStore = useAppStore()
@@ -112,7 +111,7 @@
   }
 
   const onRemove = (targetKey: string | MouseEvent) => {
-    if (!((targetKey as string) && isString(targetKey))) {
+    if (!((targetKey as string) && typeof targetKey === 'string')) {
       targetKey = activeKey.value
     }
     multiTabs = multiTabs.filter((page) => page.fullPath !== targetKey)

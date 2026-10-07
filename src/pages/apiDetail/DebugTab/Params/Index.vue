@@ -6,18 +6,26 @@
   >
     <a-tabs v-model:activeKey="state.activeTab" type="card" size="small">
       <a-tab-pane :key="ParamTypeEnum.HEADER" :tab="t('apiPage.debug.header')">
-        <header-params ref="headerRef" :data="state.headerData" @cell-change="onHeaderCellChange" />
+        <debug-params-table
+          type="header"
+          :data="state.headerData"
+          @cell-change="onHeaderCellChange"
+        />
       </a-tab-pane>
       <a-tab-pane
         v-if="state.routeData && state.routeData.length"
         :key="ParamTypeEnum.ROUTEPARAM"
         :tab="t('apiPage.debug.routeParam')"
       >
-        <route-params ref="routeRef" :data="state.routeData" @cell-change="onRouteCellChange" />
+        <debug-params-table
+          type="route"
+          :data="state.routeData"
+          @cell-change="onRouteCellChange"
+        />
       </a-tab-pane>
       <a-tab-pane :key="ParamTypeEnum.QUERY" :tab="t('apiPage.debug.query')">
-        <query-params
-          ref="queryRef"
+        <debug-params-table
+          type="query"
           :data="state.queryData"
           @add-row="onAddQueryTableRow"
           @delete-row="onDeleteQueryTableRow"
@@ -55,16 +63,13 @@
   import { useI18n } from '/@/hooks/useI18n'
   import { ApiDetailResult, ApiDetailParamItem } from '/@/api/apidocApi/types'
   import { ReloadOutlined } from '@ant-design/icons-vue'
-  import HeaderParams from './HeaderParams.vue'
-  import RouteParams from './RouteParams.vue'
-  import QueryParams from './QueryParams.vue'
+  import DebugParamsTable from './DebugParamsTable.vue'
   import BodyParams from './BodyParams.vue'
   import { createRandKey } from '/@/utils/helper'
   import useDebugApi from '/@/hooks/useDebugApi'
   import { ParamTypeEnum } from '/@/enums/requestParamTypeEnum'
   import { useApidocStore } from '/@/store'
   import { ConfigGlobalParams } from '/@/api/globalApi/types'
-  import { isArray } from 'lodash-es'
   import { formatJsonCode } from '/@/utils/helper/codeHelper'
 
   const apidocStore = useApidocStore()
@@ -182,7 +187,7 @@
           const item = globalPramsItems[i]
           globalPramsItemsByKey[`${item.appKey}_${item.name}`] = item
         }
-        if (isArray(itemParams) && itemParams.length) {
+        if (Array.isArray(itemParams) && itemParams.length) {
           const newParams = itemParams.map((p) => {
             const key = `${props.detail.appKey}_${p.name}`
             const allKey = `all_${p.name}`

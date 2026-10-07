@@ -1,5 +1,4 @@
 import { i18n } from '/@/locales/setupI18n'
-import type { TranslateResult } from 'vue-i18n'
 
 type I18nGlobalTranslation = {
   (key: string): string
@@ -45,9 +44,4 @@ export function useI18n(namespace?: string): {
     ...methods,
     t: tFn,
   }
-}
-
-export const t = (key: string, namespace?: string): TranslateResult => {
-  const { t } = i18n.global
-  return (t as any)(getKey(namespace, key))
 }

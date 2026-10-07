@@ -99,7 +99,7 @@
   import { reactive } from 'vue'
   import { useAppStore } from '/@/store/modules/app'
   import { useI18n } from '/@/hooks/useI18n'
-  import ApiTreeSelect from '../ApiTreeSelect'
+  import ApiTreeSelect from '../ApiTreeSelect/ApiTreeSelect.vue'
   import apidocApi from '/@/api/apidocApi'
   import DataForm from '/@/components/DataForm'
   import { ConfigCodeTemplateItem } from '/@/api/globalApi/types'
@@ -185,14 +185,6 @@
     state.visible = true
   })
 
-  // async function onSubmit() {
-  //   try {
-  //   } catch (error) {
-  //     state.loading = false
-  //   }
-
-  //   // props.onSuccess && props.onSuccess()
-  // }
   const onCancel = () => {
     state.visible = false
     props.onCancel && props.onCancel()

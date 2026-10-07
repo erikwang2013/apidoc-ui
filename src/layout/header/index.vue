@@ -20,13 +20,6 @@
         <host-select />
         <lang-select />
         <tools-menu v-if="!appStore.shareKey" @reload-menu="onReloadMenu" />
-        <!-- <user-menu /> -->
-
-        <!-- <global-params />
-        <lang-select /> -->
-        <!-- <generator @submitSuccess="onGeneratorSubmitSuccess" /> -->
-        <!-- <a-button><AppstoreOutlined />Tools</a-button>-->
-        <!-- <tools @reloadApiMenus="onReloadApiMenus" /> -->
       </a-space>
     </div>
   </div>
@@ -42,7 +35,6 @@
   import LangSelect from '/@/components/LangSelect'
   import ToolsMenu from './ToolsMenu.vue'
   import HostSelect from '/@/components/HostSelect'
-  // import UserMenu from './UserMenu.vue'
 
   import { useI18n } from '/@/hooks/useI18n'
   const { t } = useI18n()

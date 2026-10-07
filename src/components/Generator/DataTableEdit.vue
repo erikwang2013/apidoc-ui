@@ -34,12 +34,12 @@
 
 <script setup lang="ts">
   import EditTable from '/@/components/EditTable'
-  import { cloneDeep, trim, isArray } from 'lodash-es'
   import { useI18n } from '/@/hooks/useI18n'
   import {
     camelToUnderline,
     checkStringRules,
     createRandKey,
+    deepClone,
     replaceAppConfigKeys,
     replaceStringByParam,
   } from '/@/utils/helper'
@@ -86,7 +86,7 @@
   })
 
   if (props.data && props.data.length) {
-    state.currentData = cloneDeep(props.data).map((p) => {
+    state.currentData = deepClone(props.data).map((p) => {
       return {
         ...p,
         id: createRandKey(),
@@ -180,7 +180,7 @@
 
     if (props.option && props.option.columns) {
       for (let i = 0; i < props.option.columns.length; i++) {
-        const column = cloneDeep(props.option.columns[i])
+        const column = props.option.columns[i]
         columns.push({
           width: column.width ? column.width : 80,
           align: column.align ? column.align : 'center',
@@ -249,8 +249,8 @@
 
   function getData() {
     // const { tableName, modelName } = state;
-    const tableName = trim(state.tableName)
-    const modelName = trim(state.modelName)
+    const tableName = state.tableName.trim()
+    const modelName = state.modelName.trim()
     //验证模型名规则
     let model_rules: InputRuleItem[] = [
       { required: true, message: t('generator.model.name.placeholder') },
@@ -300,7 +300,7 @@
         isHandleItemData = true
       }
     }
-    const currentData: ObjectType<any>[] = cloneDeep(state.currentData)
+    const currentData: ObjectType<any>[] = deepClone(state.currentData)
     const datas = currentData.map((item, index: number) => {
       // 存在需要处理的列，才执行
       if (isHandleItemData) {
@@ -322,7 +322,7 @@
               column.itemRender?.name === 'select' &&
               column.itemRender.props &&
               column.itemRender.props.mode == 'multiple' &&
-              isArray(val)
+              Array.isArray(val)
             ) {
               values = column.itemRender.props.options.filter((p: any) => val.includes(p.value))
             } else {

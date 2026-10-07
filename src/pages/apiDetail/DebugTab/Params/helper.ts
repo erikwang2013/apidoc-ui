@@ -1,8 +1,7 @@
 import Mock from 'mockjs'
-import { cloneDeep } from 'lodash-es'
 import { ApiDetailParamItem } from '/@/api/apidocApi/types'
 import { ConfigGlobalParams } from '/@/api/globalApi/types'
-import { createRandKey } from '/@/utils/helper'
+import { createRandKey, deepClone } from '/@/utils/helper'
 
 export const renderData = (
   params: ApiDetailParamItem[],
@@ -10,7 +9,7 @@ export const renderData = (
   globalParams: ConfigGlobalParams,
   appKey?: string,
 ) => {
-  const data = cloneDeep(params)
+  const data = deepClone(params)
 
   if (data && data.length) {
     // 合并全局参数

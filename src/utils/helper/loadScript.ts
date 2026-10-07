@@ -13,7 +13,7 @@ export function loadVoLteResourceList(RESOURCE_LIST) {
   })
 }
 
-export function loadScript(url) {
+function loadScript(url) {
   return new Promise((resolve, reject) => {
     const script = document.createElement('script')
 

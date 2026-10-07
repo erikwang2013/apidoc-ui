@@ -15,8 +15,7 @@ import { IResponse } from '/@/utils/http/axios/type'
 import { handleApidocHttpError } from '/@/utils/http/axios/handleError'
 import { useAppOutsideStore } from '/@/store/modules/app/index'
 import { ConfigGlobalParamItem, ConfigResult } from '/@/api/globalApi/types'
-import { createRandKey } from '/@/utils/helper'
-import { cloneDeep } from 'lodash-es'
+import { createRandKey, deepClone } from '/@/utils/helper'
 export const useApidocStore = defineStore('apidoc', {
   state: (): ApidocState => ({
     apiMenus: [],
@@ -40,11 +39,6 @@ export const useApidocStore = defineStore('apidoc', {
   }),
   getters: {},
   actions: {
-    // Update app settings
-    updateSettings(partial: Partial<ApidocState>) {
-      // @ts-ignore-next-line
-      this.$patch(partial)
-    },
     setDashboard(data) {
       this.dashboard = { ...this.dashboard, ...data }
     },
@@ -121,7 +115,7 @@ export const useApidocStore = defineStore('apidoc', {
         if (config.params && config.params[paramType]) {
           const params = config.params[paramType] as ConfigGlobalParamItem[]
           for (let i = 0; i < params.length; i++) {
-            const item = cloneDeep(params[i])
+            const item = deepClone(params[i])
             item.id = createRandKey()
             item.appKey = 'all'
             item.addSource = 'config'
@@ -144,7 +138,7 @@ export const useApidocStore = defineStore('apidoc', {
             if (appItem.params && appItem.params[paramType]) {
               const params = appItem.params[paramType] as ConfigGlobalParamItem[]
               for (let i = 0; i < params.length; i++) {
-                const item = cloneDeep(params[i])
+                const item = deepClone(params[i])
                 item.id = createRandKey()
                 item.addSource = 'config'
                 item.appKey = key

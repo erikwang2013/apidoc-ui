@@ -33,7 +33,7 @@ function escapeCell(text: string): string {
 }
 
 /** 平铺嵌套参数：children 递归、名称点号拼接（不调用 handleTableDataRowKey，避免注入随机 key） */
-export function flattenParams(items: ApiDetailParamItem[], prefix = ''): string[][] {
+function flattenParams(items: ApiDetailParamItem[], prefix = ''): string[][] {
   const rows: string[][] = []
   ;(items || []).forEach((item) => {
     const name = prefix ? `${prefix}.${item.name}` : String(item.name || '')

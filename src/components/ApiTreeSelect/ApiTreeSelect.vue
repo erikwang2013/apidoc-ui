@@ -46,7 +46,7 @@
   import { ApiMenusResult } from '/@/api/apidocApi/types'
   import type { TreeProps } from 'ant-design-vue'
   import { CopyrightCircleOutlined, FolderOutlined } from '@ant-design/icons-vue'
-  import { cloneDeep } from 'lodash-es'
+  import { deepClone } from '/@/utils/helper'
   const appStore = useAppStore()
 
   interface Props {
@@ -84,7 +84,7 @@
 
   const onSearch = (key: string) => {
     state.keyword = key
-    state.apiTreeData = filterApiData(cloneDeep(state.apiResData))
+    state.apiTreeData = filterApiData(deepClone(state.apiResData))
   }
   const onAppChange = async (appKey: string): Promise<any> => {
     state.appKey = appKey

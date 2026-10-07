@@ -1,4 +1,3 @@
-import { trim } from 'lodash-es'
 import Mock from 'mockjs'
 import './mockExtend'
 import { ObjectType } from '/#/index'
@@ -35,7 +34,7 @@ export function renderCodeJsonByParams<T>(
       }
       let value = ['int', 'float', 'boolean', 'array', 'object'].includes(item.type)
         ? fieldValue
-        : `${trim(fieldValue)}`
+        : `${fieldValue ?? ''}`.trim()
       if (item.type == 'object' && item.children && item.children.length) {
         value = renderCodeJsonByParams(item.children, isMock)
       } else if (item.type == 'array' && item.children && item.children.length) {
@@ -79,18 +78,6 @@ export function renderCodeJsonByParams<T>(
     })
   }
   return json
-}
-
-/**
- * 获取指定数量的空格
- * @param {int} indent
- */
-export function getIndent(indent: number): string {
-  let string = ''
-  for (let i = 0; i < indent; i++) {
-    string += '\xa0'
-  }
-  return string
 }
 
 interface objectState {

@@ -76,7 +76,6 @@ export interface HostItem {
 
 interface Menu {
   SHOWURL: boolean
-  WIDTH: number
 }
 
 interface Cache {

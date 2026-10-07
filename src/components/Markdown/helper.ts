@@ -1,5 +1,3 @@
-import { trim } from 'lodash-es'
-
 interface ItemState {
   title: string
   level: number
@@ -42,7 +40,7 @@ function getTitle(content: string) {
     const level = m1.length
     title = title.replace(/^#+/, '').replace(/\([^)]*?\)/, '')
     tempArr.push({
-      title: trim(title),
+      title: title.trim(),
       level: level,
       children: [],
     })

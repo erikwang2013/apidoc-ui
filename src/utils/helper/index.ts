@@ -282,3 +282,10 @@ export const downloadFile = (url: string, fileName = 'downloadFile') => {
   a.click()
   document.body.removeChild(a)
 }
+
+/**
+ * 深拷贝：等价于 lodash 的 cloneDeep，用于 JSON 型数据
+ * 必须先 toRaw 脱掉 Vue 响应式代理——structuredClone 遇到 Proxy 会抛 DataCloneError；
+ * 数据中不能含函数/ref 等不可结构化克隆的值
+ */
+export const deepClone = <T>(value: T): T => structuredClone(toRaw(value))
