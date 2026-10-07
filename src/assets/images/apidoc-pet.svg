@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 260" width="220" height="220" role="img" aria-label="Apidoc 宠物">
+  <!-- 背景 -->
+  <circle cx="130" cy="136" r="106" fill="#EEEDFB"/>
+  <ellipse cx="130" cy="203" rx="56" ry="10" fill="#3B3663" opacity=".08"/>
+  <g stroke-linecap="round" stroke-linejoin="round">
+    <!-- 手臂(在身体下层) -->
+    <g fill="none" stroke="#3B3663" stroke-width="10">
+      <path d="M 78 122 Q 58 132 50 142"/>
+      <path d="M 182 116 Q 200 106 206 94"/>
+    </g>
+    <!-- 脚 -->
+    <g fill="#3B3663">
+      <ellipse cx="108" cy="196" rx="15" ry="9"/>
+      <ellipse cx="152" cy="196" rx="15" ry="9"/>
+    </g>
+    <!-- 身体:文档页 -->
+    <path d="M 84 52 H 156 L 192 88 V 172 A 16 16 0 0 1 176 188 H 84 A 16 16 0 0 1 68 172 V 68 A 16 16 0 0 1 84 52 Z" fill="#FFFFFF" stroke="#3B3663" stroke-width="6"/>
+    <!-- 折角 -->
+    <path d="M 156 52 L 156 88 L 192 88 Z" fill="#DCD7F7" stroke="#3B3663" stroke-width="5"/>
+    <!-- 头顶嫩芽 -->
+    <path d="M 100 54 C 100 46 98 40 95 35" fill="none" stroke="#3B3663" stroke-width="5"/>
+    <path d="M 95 35 C 82 34 73 27 75 16 C 87 17 95 25 95 35 Z" fill="#7ED9A0" stroke="#3B3663" stroke-width="5"/>
+    <!-- 表情 -->
+    <g fill="#3B3663">
+      <circle cx="112" cy="114" r="10"/>
+      <circle cx="148" cy="114" r="10"/>
+    </g>
+    <g fill="#FFFFFF">
+      <circle cx="108.5" cy="110.5" r="3.5"/>
+      <circle cx="144.5" cy="110.5" r="3.5"/>
+    </g>
+    <g fill="#FFB3C7" opacity=".85">
+      <ellipse cx="96" cy="132" rx="9" ry="5.5"/>
+      <ellipse cx="164" cy="132" rx="9" ry="5.5"/>
+    </g>
+    <path d="M 122 132 Q 130 141 138 132" fill="none" stroke="#3B3663" stroke-width="4.5"/>
+    <!-- 胸前 attributes 徽章 -->
+    <rect x="90" y="152" width="80" height="26" rx="13" fill="#6C5CE7" stroke="#3B3663" stroke-width="4"/>
+    <text x="130" y="170" text-anchor="middle" font-family="SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace" font-size="13" font-weight="700" fill="#FFFFFF">#[API-UI]</text>
+    <!-- 手 -->
+    <g fill="#3B3663">
+      <circle cx="48" cy="144" r="8"/>
+      <circle cx="208" cy="90" r="8"/>
+    </g>
+    <!-- 星星 -->
+    <g fill="#FFC53D">
+      <path d="M 52 66 L 55.5 74.5 L 64 78 L 55.5 81.5 L 52 90 L 48.5 81.5 L 40 78 L 48.5 74.5 Z"/>
+      <path d="M 56 174 L 58.5 179.5 L 64 182 L 58.5 184.5 L 56 190 L 53.5 184.5 L 48 182 L 53.5 179.5 Z"/>
+    </g>
+    <path d="M 208 131 L 210.5 137.5 L 217 140 L 210.5 142.5 L 208 149 L 205.5 142.5 L 199 140 L 205.5 137.5 Z" fill="#A29BFE"/>
+  </g>
+</svg>

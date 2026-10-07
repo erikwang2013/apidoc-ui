@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Apidoc 图标">
+  <g stroke-linecap="round" stroke-linejoin="round">
+    <!-- 文档页身体(带折角) -->
+    <path d="M 15 5 H 43 L 59 21 V 51 A 8 8 0 0 1 51 59 H 13 A 8 8 0 0 1 5 51 V 13 A 8 8 0 0 1 13 5 Z" fill="#FFFFFF" stroke="#3B3663" stroke-width="5"/>
+    <path d="M 43 5 L 43 21 L 59 21 Z" fill="#DCD7F7" stroke="#3B3663" stroke-width="4"/>
+    <!-- 表情 -->
+    <g fill="#3B3663">
+      <circle cx="24" cy="31" r="6"/>
+      <circle cx="40" cy="31" r="6"/>
+    </g>
+    <g fill="#FFFFFF">
+      <circle cx="22.5" cy="29" r="1.8"/>
+      <circle cx="38.5" cy="29" r="1.8"/>
+    </g>
+    <path d="M 27 45 Q 32 50 37 45" fill="none" stroke="#3B3663" stroke-width="3.5"/>
+    <!-- 腮红 -->
+    <g fill="#FFB3C7" opacity=".85">
+      <ellipse cx="15" cy="41" rx="4" ry="2.5"/>
+      <ellipse cx="49" cy="41" rx="4" ry="2.5"/>
+    </g>
+  </g>
+</svg>

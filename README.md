@@ -1,3 +1,5 @@
+![Apidoc 宠物](assets/apidoc-pet.svg)
+
 # ApiDoc UI
 
 基于 Vue3 + TypeScript 的 API 接口文档前端，配合 [apidoc-php](https://github.com/erikwang2013/apidoc-php) 后端使用。构建产物为纯静态文件，不依赖任何后端运行环境。
@@ -116,4 +118,3 @@ types/                 # 全局类型声明
 
 - 后端 / 注解解析引擎（本项目的来源）：[HGthecode/apidoc-php](https://github.com/erikwang2013/apidoc-php)
 - composer 扩展包：[hg/apidoc](https://packagist.org/packages/erikwang2013/apidoc-php)
-

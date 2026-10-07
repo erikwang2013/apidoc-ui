@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" width="1280" height="640" role="img" aria-label="ApiDoc UI — Vue3 + TypeScript 实现的 API 文档前端界面">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F4F1FE"/>
+      <stop offset="1" stop-color="#FFFFFF"/>
+    </linearGradient>
+    <pattern id="dots" width="34" height="34" patternUnits="userSpaceOnUse">
+      <circle cx="17" cy="17" r="2" fill="#CFC9EE" opacity=".45"/>
+    </pattern>
+  </defs>
+
+  <rect width="1280" height="640" fill="url(#bg)"/>
+  <rect width="1280" height="640" fill="url(#dots)"/>
+  <circle cx="1040" cy="330" r="252" fill="#E9E6FB"/>
+
+  <!-- Apidoc 宠物 -->
+  <g transform="translate(838.5 119.2) scale(1.55)" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="130" cy="136" r="106" fill="#EEEDFB"/>
+    <ellipse cx="130" cy="203" rx="56" ry="10" fill="#3B3663" opacity=".08"/>
+    <g fill="none" stroke="#3B3663" stroke-width="10">
+      <path d="M 78 122 Q 58 132 50 142"/>
+      <path d="M 182 116 Q 200 106 206 94"/>
+    </g>
+    <g fill="#3B3663">
+      <ellipse cx="108" cy="196" rx="15" ry="9"/>
+      <ellipse cx="152" cy="196" rx="15" ry="9"/>
+    </g>
+    <path d="M 84 52 H 156 L 192 88 V 172 A 16 16 0 0 1 176 188 H 84 A 16 16 0 0 1 68 172 V 68 A 16 16 0 0 1 84 52 Z" fill="#FFFFFF" stroke="#3B3663" stroke-width="6"/>
+    <path d="M 156 52 L 156 88 L 192 88 Z" fill="#DCD7F7" stroke="#3B3663" stroke-width="5"/>
+    <path d="M 100 54 C 100 46 98 40 95 35" fill="none" stroke="#3B3663" stroke-width="5"/>
+    <path d="M 95 35 C 82 34 73 27 75 16 C 87 17 95 25 95 35 Z" fill="#7ED9A0" stroke="#3B3663" stroke-width="5"/>
+    <g fill="#3B3663">
+      <circle cx="112" cy="114" r="10"/>
+      <circle cx="148" cy="114" r="10"/>
+    </g>
+    <g fill="#FFFFFF">
+      <circle cx="108.5" cy="110.5" r="3.5"/>
+      <circle cx="144.5" cy="110.5" r="3.5"/>
+    </g>
+    <g fill="#FFB3C7" opacity=".85">
+      <ellipse cx="96" cy="132" rx="9" ry="5.5"/>
+      <ellipse cx="164" cy="132" rx="9" ry="5.5"/>
+    </g>
+    <path d="M 122 132 Q 130 141 138 132" fill="none" stroke="#3B3663" stroke-width="4.5"/>
+    <rect x="90" y="152" width="80" height="26" rx="13" fill="#6C5CE7" stroke="#3B3663" stroke-width="4"/>
+    <text x="130" y="170" text-anchor="middle" font-family="Source Han Mono, Noto Sans Mono CJK SC, monospace" font-size="13" font-weight="700" fill="#FFFFFF">#[API-UI]</text>
+    <g fill="#3B3663">
+      <circle cx="48" cy="144" r="8"/>
+      <circle cx="208" cy="90" r="8"/>
+    </g>
+    <g fill="#FFC53D">
+      <path d="M 52 66 L 55.5 74.5 L 64 78 L 55.5 81.5 L 52 90 L 48.5 81.5 L 40 78 L 48.5 74.5 Z"/>
+      <path d="M 56 174 L 58.5 179.5 L 64 182 L 58.5 184.5 L 56 190 L 53.5 184.5 L 48 182 L 53.5 179.5 Z"/>
+    </g>
+    <path d="M 208 131 L 210.5 137.5 L 217 140 L 210.5 142.5 L 208 149 L 205.5 142.5 L 199 140 L 205.5 137.5 Z" fill="#A29BFE"/>
+  </g>
+
+  <!-- 装饰星星 -->
+  <g fill="#FFC53D">
+    <path d="M 170 68 L 175.2 80.8 L 188 86 L 175.2 91.2 L 170 104 L 164.8 91.2 L 152 86 L 164.8 80.8 Z"/>
+    <path d="M 860 544 L 864.3 554.7 L 875 559 L 864.3 563.3 L 860 574 L 855.7 563.3 L 845 559 L 855.7 554.7 Z"/>
+  </g>
+  <g fill="#A29BFE">
+    <path d="M 850 96 L 853.2 103.8 L 861 107 L 853.2 110.2 L 850 118 L 846.8 110.2 L 839 107 L 846.8 103.8 Z"/>
+    <path d="M 660 128 L 663.2 135.8 L 671 139 L 663.2 142.2 L 660 150 L 656.8 142.2 L 649 139 L 656.8 135.8 Z"/>
+  </g>
+
+  <!-- 主文案 -->
+  <rect x="100" y="112" width="466" height="56" rx="28" fill="#FFFFFF" stroke="#E3DFF7" stroke-width="2"/>
+  <text x="128" y="148" font-family="Source Han Mono, Noto Sans Mono CJK SC, monospace" font-size="26" fill="#6C5CE7">&lt;script setup lang="ts"&gt;</text>
+
+  <text x="100" y="345" font-family="Noto Sans CJK SC, sans-serif" font-size="120" font-weight="700" letter-spacing="-2" fill="#3B3663">ApiDoc <tspan fill="#6C5CE7">UI</tspan></text>
+
+  <text x="104" y="420" font-family="Noto Sans CJK SC, sans-serif" font-size="32" fill="#5C5680">Vue3 + TypeScript 实现的 API 文档前端界面</text>
+
+  <text x="104" y="482" font-family="Noto Sans CJK SC, sans-serif" font-size="28" fill="#8B86AD">在线调试 · Mock 数据 · Json/TypeScript 生成 · 接口分享</text>
+
+  <text x="104" y="576" font-family="Source Han Mono, Noto Sans Mono CJK SC, monospace" font-size="24" fill="#A5A0C4">github.com/erikwang2013/apidoc-ui</text>
+</svg>

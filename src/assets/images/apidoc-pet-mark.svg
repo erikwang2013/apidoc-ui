@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200" role="img" aria-label="ApiDoc 宠物">
+  <circle cx="100" cy="100" r="94" fill="#EEEDFB"/>
+  <g transform="translate(100 100) scale(0.81) translate(-130 -102)" stroke-linecap="round" stroke-linejoin="round">
+    <!-- 身体:文档页 -->
+    <path d="M 84 52 H 156 L 192 88 V 172 A 16 16 0 0 1 176 188 H 84 A 16 16 0 0 1 68 172 V 68 A 16 16 0 0 1 84 52 Z" fill="#FFFFFF" stroke="#3B3663" stroke-width="7.5"/>
+    <!-- 折角 -->
+    <path d="M 156 52 L 156 88 L 192 88 Z" fill="#DCD7F7" stroke="#3B3663" stroke-width="6.2"/>
+    <!-- 头顶嫩芽 -->
+    <path d="M 100 54 C 100 46 98 40 95 35" fill="none" stroke="#3B3663" stroke-width="6.2"/>
+    <path d="M 95 35 C 82 34 73 27 75 16 C 87 17 95 25 95 35 Z" fill="#7ED9A0" stroke="#3B3663" stroke-width="6.2"/>
+    <!-- 表情 -->
+    <g fill="#3B3663">
+      <circle cx="112" cy="114" r="11"/>
+      <circle cx="148" cy="114" r="11"/>
+    </g>
+    <g fill="#FFFFFF">
+      <circle cx="108.5" cy="110.5" r="3.8"/>
+      <circle cx="144.5" cy="110.5" r="3.8"/>
+    </g>
+    <g fill="#FFB3C7" opacity=".85">
+      <ellipse cx="96" cy="132" rx="9" ry="5.5"/>
+      <ellipse cx="164" cy="132" rx="9" ry="5.5"/>
+    </g>
+    <path d="M 122 132 Q 130 141 138 132" fill="none" stroke="#3B3663" stroke-width="5.6"/>
+  </g>
+</svg>

@@ -1,6 +1,6 @@
 <template>
   <a class="header-logo">
-    <img class="header-logo_img" src="../../assets/images/logo.png" />
+    <img class="header-logo_img" src="../../assets/images/apidoc-pet-mark.svg" alt="ApiDoc" />
     <span v-if="appStore.device != DeviceEnum.MOBILE" class="header-logo_title">{{ title }}</span>
   </a>
 </template>
@@ -23,6 +23,9 @@
       vertical-align: top;
       margin-right: 16px;
       display: inline-block;
+      // 高度须为 29px：页头总高 39px 由 sider/multitabs 的 top: 39px 依赖
+      width: 29px;
+      height: 29px;
     }
     &_title {
       color: @text-color;
