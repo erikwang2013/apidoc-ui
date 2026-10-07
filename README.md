@@ -11,7 +11,7 @@ Apidoc是一套通过解析 PHP/Rust/Go 注解自动生成 API 接口文档的�
 - 服务端为 PHP/Rust/Go，接口代码中写几句注解即可自动产出文档数据；
 - 本项目（ApiDoc UI）即该方案的**前端界面**：负责拉取接口配置与文档数据，以应用 / 版本 / 分组的形式展示接口文档，并提供在线调试、接口分享、Swagger 导出、缓存管理等一系列开箱功能。
 
-项目来源于 [HGthecode/apidoc-php] 生态，原作者为 HG-CODE，本仓库为独立维护的 UI 前端仓库。
+项目来源于 [HGthecode/apidoc-php](https://github.com/erikwang2013/apidoc-php) 生态，原作者为 HG-CODE，本仓库为独立维护的 UI 前端仓库。
 
 ## 项目说明
 
@@ -116,5 +116,5 @@ types/                 # 全局类型声明
 
 ## 相关项目
 
-- 后端 / 注解解析引擎（本项目的来源）：[HGthecode/apidoc-php]
-- composer 扩展包：[hg/apidoc]
+- 后端 / 注解解析引擎（本项目的来源）：[HGthecode/apidoc-php](https://github.com/erikwang2013/apidoc-php)
+- composer 扩展包：[hg/apidoc](https://packagist.org/packages/erikwang2013/apidoc-php)
