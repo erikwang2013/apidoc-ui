@@ -1,17 +1,17 @@
-![Apidoc 宠物](assets/apidoc-pet.svg)
+![ApiDoc-Ui 宠物](assets/apidoc-pet.svg)
 
 # ApiDoc UI
 
-基于 Vue3 + TypeScript 的 API 接口文档前端，配合 [apidoc-php](https://github.com/erikwang2013/apidoc-php) 后端使用。构建产物为纯静态文件，不依赖任何后端运行环境。
+基于 Vue3 + TypeScript 的 API 接口文档前端，配合 [apidoc-php](https://github.com/erikwang2013/apidoc-php)、[apidoc-rust](https://github.com/erikwang2013/apidoc-rust)、[apidoc-go](https://github.com/erikwang2013/apidoc-go) 后端使用。构建产物为纯静态文件，不依赖任何后端运行环境。
 
 ## 项目介绍
 
-[Apidoc](https://github.com/erikwang2013/apidoc-php) 是一套通过解析 PHP 注解自动生成 API 接口文档的解决方案：
+Apidoc是一套通过解析 PHP/Rust/Go 注解自动生成 API 接口文档的解决方案：
 
-- 服务端为 PHP composer 扩展（[erikwang2013/apidoc-php](https://packagist.org/packages/erikwang2013/apidoc-php)），开箱兼容 ThinkPHP、Laravel、Hyperf、Webman 等主流框架，接口代码中写几句注解即可自动产出文档数据；
+- 服务端为 PHP/Rust/Go，接口代码中写几句注解即可自动产出文档数据；
 - 本项目（ApiDoc UI）即该方案的**前端界面**：负责拉取接口配置与文档数据，以应用 / 版本 / 分组的形式展示接口文档，并提供在线调试、接口分享、Swagger 导出、缓存管理等一系列开箱功能。
 
-项目来源于 [HGthecode/apidoc-php](https://github.com/erikwang2013/apidoc-php) 生态，原作者为 HG-CODE，本仓库为独立维护的 UI 前端仓库。
+项目来源于 [HGthecode/apidoc-php] 生态，原作者为 HG-CODE，本仓库为独立维护的 UI 前端仓库。
 
 ## 项目说明
 
@@ -116,5 +116,5 @@ types/                 # 全局类型声明
 
 ## 相关项目
 
-- 后端 / 注解解析引擎（本项目的来源）：[HGthecode/apidoc-php](https://github.com/erikwang2013/apidoc-php)
-- composer 扩展包：[hg/apidoc](https://packagist.org/packages/erikwang2013/apidoc-php)
+- 后端 / 注解解析引擎（本项目的来源）：[HGthecode/apidoc-php]
+- composer 扩展包：[hg/apidoc]
