@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 260 260" width="260" height="260" role="img" aria-label="Apidoc UI · 笑 Smile"><title>Apidoc UI · 笑 Smile</title><desc>Apidoc UI 的 笑 表情形态 · animated expression form</desc><style>
+.ex-motion { animation: ex-bob 3.2s ease-in-out infinite; transform-box: fill-box; transform-origin: 50% 50%; }
+.ex-anim-tear { animation: ex-tear 1.8s ease-in infinite; transform-box: fill-box; transform-origin: center; }
+.ex-anim-sweat { animation: ex-tear 1.5s ease-in infinite; transform-box: fill-box; transform-origin: center; }
+.ex-anim-heart { animation: ex-heart 2.2s ease-out infinite; transform-box: fill-box; transform-origin: center; }
+.ex-anim-spark { animation: ex-spark 1.9s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+.ex-anim-rain { animation: ex-rain 1.4s linear infinite; transform-box: fill-box; transform-origin: center; }
+.ex-anim-confetti { animation: ex-confetti 2.4s linear infinite; transform-box: fill-box; transform-origin: center; }
+.ex-anim-pulse { animation: ex-pulse 1.6s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+.ex-anim-knock { animation: ex-knock 0.55s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+.ex-anim-knockline { animation: ex-knockline 0.55s ease-out infinite; transform-box: fill-box; transform-origin: center; }
+.ex-anim-palm { animation: ex-palm 0.9s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+.ex-anim-steam { animation: ex-steam 1.8s ease-out infinite; transform-box: fill-box; transform-origin: center; }
+.ex-anim-shock { animation: ex-shock 0.5s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+.ex-anim-please { animation: ex-please 1.4s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+.ex-anim-drift { animation: ex-drift 4.5s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes ex-bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-3.2px); } }
+@keyframes ex-tear { 0% { transform: translateY(0); opacity: 0; } 18% { opacity: 1; } 100% { transform: translateY(11px); opacity: 0; } }
+@keyframes ex-heart { 0% { transform: translateY(0) scale(.65); opacity: 0; } 20% { opacity: 1; } 100% { transform: translateY(-18px) scale(1.15); opacity: 0; } }
+@keyframes ex-spark { 0%,100% { transform: scale(.6) rotate(0deg); opacity: .3; } 50% { transform: scale(1.15) rotate(25deg); opacity: 1; } }
+@keyframes ex-rain { 0% { transform: translateY(0); opacity: 0; } 20% { opacity: 1; } 100% { transform: translateY(12px); opacity: 0; } }
+@keyframes ex-confetti { 0% { transform: translateY(-4px) rotate(0deg); opacity: 1; } 100% { transform: translateY(16px) rotate(200deg); opacity: 0; } }
+@keyframes ex-pulse { 0%,100% { transform: scale(1); opacity: .35; } 50% { transform: scale(1.18); opacity: .7; } }
+@keyframes ex-knock { 0%,100% { transform: translateX(4.5px); } 35% { transform: translateX(0); } }
+@keyframes ex-knockline { 0%,100% { transform: scaleX(.6); opacity: .35; } 35% { transform: scaleX(1); opacity: 1; } }
+@keyframes ex-palm { 0%,100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-1.2px) rotate(-4deg); } }
+@keyframes ex-steam { 0% { transform: translateY(0); opacity: .7; } 100% { transform: translateY(-9px); opacity: 0; } }
+@keyframes ex-shock { 0%,100% { transform: scaleX(.7); opacity: .4; } 50% { transform: scaleX(1.25); opacity: 1; } }
+@keyframes ex-please { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-1.8px); } }
+@keyframes ex-drift { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
+@media (prefers-reduced-motion: reduce) {
+  .ex-motion, [class*="ex-anim-"] { animation: none !important; }
+}
+</style><g class="ex-motion ex-smile"><g class="ex-base"><circle cx="130" cy="136" r="106" fill="#EEEDFB"/>
+  <ellipse cx="130" cy="203" rx="56" ry="10" fill="#3B3663" opacity=".08"/>
+  <g stroke-linecap="round" stroke-linejoin="round">
+    
+    <g fill="none" stroke="#3B3663" stroke-width="10">
+      <path d="M 78 122 Q 58 132 50 142"/>
+      <path d="M 182 116 Q 200 106 206 94"/>
+    </g>
+    
+    <g fill="#3B3663">
+      <ellipse cx="108" cy="196" rx="15" ry="9"/>
+      <ellipse cx="152" cy="196" rx="15" ry="9"/>
+    </g>
+    
+    <path d="M 84 52 H 156 L 192 88 V 172 A 16 16 0 0 1 176 188 H 84 A 16 16 0 0 1 68 172 V 68 A 16 16 0 0 1 84 52 Z" fill="#FFFFFF" stroke="#3B3663" stroke-width="6"/>
+    
+    <path d="M 156 52 L 156 88 L 192 88 Z" fill="#DCD7F7" stroke="#3B3663" stroke-width="5"/>
+    
+    <path d="M 100 54 C 100 46 98 40 95 35" fill="none" stroke="#3B3663" stroke-width="5"/>
+    <path d="M 95 35 C 82 34 73 27 75 16 C 87 17 95 25 95 35 Z" fill="#7ED9A0" stroke="#3B3663" stroke-width="5"/>
+    
+    <g fill="#3B3663">
+      <circle cx="112" cy="114" r="10"/>
+      <circle cx="148" cy="114" r="10"/>
+    </g>
+    <g fill="#FFFFFF">
+      <circle cx="108.5" cy="110.5" r="3.5"/>
+      <circle cx="144.5" cy="110.5" r="3.5"/>
+    </g>
+    <g fill="#FFB3C7" opacity=".85">
+      <ellipse cx="96" cy="132" rx="9" ry="5.5"/>
+      <ellipse cx="164" cy="132" rx="9" ry="5.5"/>
+    </g>
+    <path d="M 122 132 Q 130 141 138 132" fill="none" stroke="#3B3663" stroke-width="4.5"/>
+    
+    <rect x="90" y="152" width="80" height="26" rx="13" fill="#6C5CE7" stroke="#3B3663" stroke-width="4"/>
+    <text x="130" y="170" text-anchor="middle" font-family="SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace" font-size="13" font-weight="700" fill="#FFFFFF">#[API-UI]</text>
+    
+    <g fill="#3B3663">
+      <circle cx="48" cy="144" r="8"/>
+      <circle cx="208" cy="90" r="8"/>
+    </g>
+    
+    <g fill="#FFC53D">
+      <path d="M 52 66 L 55.5 74.5 L 64 78 L 55.5 81.5 L 52 90 L 48.5 81.5 L 40 78 L 48.5 74.5 Z"/>
+      <path d="M 56 174 L 58.5 179.5 L 64 182 L 58.5 184.5 L 56 190 L 53.5 184.5 L 48 182 L 53.5 179.5 Z"/>
+    </g>
+    <path d="M 208 131 L 210.5 137.5 L 217 140 L 210.5 142.5 L 208 149 L 205.5 142.5 L 199 140 L 205.5 137.5 Z" fill="#A29BFE"/>
+  </g></g><g class="ex-face"><ellipse cx="130" cy="126" rx="34" ry="26" fill="#FFFFFF"/><path d="M 102.5,116.8 Q 112,102.5 121.5,116.8" fill="none" stroke="#3B3663" stroke-width="2" stroke-linecap="round"/><path d="M 138.5,116.8 Q 148,102.5 157.5,116.8" fill="none" stroke="#3B3663" stroke-width="2" stroke-linecap="round"/><path d="M 118.5,136 Q 130,146.8 141.5,136" fill="none" stroke="#3B3663" stroke-width="1.7" stroke-linecap="round"/><ellipse cx="104.5" cy="127.5" rx="7.8" ry="4.2" fill="#FF8FB3" opacity="0.5"/><ellipse cx="155.5" cy="127.5" rx="7.8" ry="4.2" fill="#FF8FB3" opacity="0.5"/><path class="ex-anim-spark" style="animation-delay:0.0s" d="M 91.56,86.8 L 93.1,90.76 L 97.06,92.3 L 93.1,93.84 L 91.56,97.8 L 90.02,93.84 L 86.06,92.3 L 90.02,90.76 Z" fill="#FFD166"/><path class="ex-anim-spark" style="animation-delay:0.5s" d="M 165.96,80.04 L 167.14,83.06 L 170.16,84.24 L 167.14,85.42 L 165.96,88.44 L 164.78,85.42 L 161.76,84.24 L 164.78,83.06 Z" fill="#FFD166"/></g></g></svg>
