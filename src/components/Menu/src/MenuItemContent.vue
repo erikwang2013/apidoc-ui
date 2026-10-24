@@ -1,6 +1,11 @@
 <template>
   <span class="menu-item-content">
     <CopyrightCircleOutlined v-if="item.type == 'controller'" />
+    <ProtocolBadge
+      v-else-if="item.protocolKey"
+      :protocol-key="item.protocolKey"
+      :protocol-label="item.protocolLabel"
+    />
     <span
       v-else-if="item.method && typeof item.method == 'object' && item.method.length"
       :class="['api-method-icon', `method-color_multiple`]"
@@ -44,6 +49,7 @@
     FileMarkdownOutlined,
   } from '@ant-design/icons-vue'
   import { ApiMenuItem } from '/@/api/apidocApi/types'
+  import ProtocolBadge from '/@/components/ProtocolBadge'
 
   const appStore = useAppStore()
 

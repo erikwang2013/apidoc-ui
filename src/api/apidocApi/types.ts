@@ -29,6 +29,9 @@ export interface ApiMenuItem {
   type?: string
   path?: string
   appKey?: string
+  protocolKey?: string
+  protocolLabel?: string
+  channelAddress?: string
 }
 
 interface GroupItem {
@@ -62,6 +65,53 @@ export interface ApiDetailResult extends ApiMenuItem {
   responseErrorMd?: string
   appKey?: string
   responseStatus?: ResponseStatusItem[]
+  protocol?: ApiProtocolInfo
+  channel?: ApiChannelInfo
+  debug?: ApiDebugInfo
+}
+
+export interface ApiProtocolInfo {
+  name: string
+  label: string
+  version?: string
+  transport?: string
+  mode?: string
+  http?: boolean
+  debuggable?: boolean
+  debugReason?: string
+}
+
+export interface ApiChannelInfo {
+  address: string
+  action?: string
+  meta?: Record<string, unknown>
+}
+
+export interface ApiDebugField extends ApiDetailParamItem {
+  in?: 'target' | 'header' | 'query' | 'body' | 'meta'
+  default?: unknown
+}
+
+export interface ApiDebugInfo {
+  mode: 'browser-http' | 'browser-websocket' | 'browser-sse' | 'relay-unary' | 'relay-stream'
+  driver: string
+  relayEnabled: boolean
+  debuggable: boolean
+  debugReason?: string
+  fields: ApiDebugField[]
+  defaults: Record<string, unknown>
+  responseEncoding: 'text' | 'json' | 'hex' | 'base64'
+  hints?: string
+}
+
+export interface ApiDebugResult {
+  ok: boolean
+  status?: number | string
+  headers?: Record<string, string>
+  body?: string
+  encoding?: 'text' | 'json' | 'hex' | 'base64'
+  meta?: Record<string, unknown>
+  error?: string
 }
 
 export interface ResponseStatusItem {
