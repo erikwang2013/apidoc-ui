@@ -61,21 +61,15 @@ export class BrowserWebSocketDriver {
 
   send(body: string, encoding: DebugEncoding) {
     if (!this.socket || this.socket.readyState !== WebSocket.OPEN) {
-      this.callbacks.onError?.(createLogEntry('out', 'text', 'WebSocket is not connected'))
-      return
+      throw new Error('WebSocket is not connected')
     }
     let data: string | Uint8Array
-    try {
-      if (encoding === 'hex') {
-        data = hexToBytes(body)
-      } else if (encoding === 'base64') {
-        data = base64ToBytes(body)
-      } else {
-        data = body
-      }
-    } catch (error) {
-      this.callbacks.onError?.(createLogEntry('out', 'text', (error as Error).message))
-      return
+    if (encoding === 'hex') {
+      data = hexToBytes(body)
+    } else if (encoding === 'base64') {
+      data = base64ToBytes(body)
+    } else {
+      data = body
     }
     this.socket.send(data)
     this.callbacks.onMessage?.(createLogEntry('out', encoding, body))

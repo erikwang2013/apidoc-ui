@@ -101,11 +101,19 @@
     connected: false,
   })
 
+  const incoming = (entry: DebugLogEntry): DebugLogEntry => {
+    const encoding = debug.value?.responseEncoding
+    if (entry.direction === 'in' && entry.encoding === 'text' && encoding && encoding !== 'text') {
+      return { ...entry, encoding }
+    }
+    return entry
+  }
+
   const wsDriver = new BrowserWebSocketDriver({
     onOpen: () => {
       state.connected = true
     },
-    onMessage: (entry) => state.log.push(entry),
+    onMessage: (entry) => state.log.push(incoming(entry)),
     onError: (entry) => {
       state.log.push(entry)
       state.connected = false
@@ -115,16 +123,7 @@
     },
   })
 
-  const sseDriver = new BrowserSseDriver({
-    onOpen: () => {
-      state.connected = true
-    },
-    onMessage: (entry) => state.log.push(entry),
-    onError: (entry) => state.log.push(entry),
-    onClose: () => {
-      state.connected = false
-    },
-  })
+  const sseDriver = new BrowserSseDriver()
 
   const buildUrl = (target: string, query: Record<string, string>) => {
     const params = new URLSearchParams()
@@ -159,7 +158,18 @@
       if (isWebSocket.value) {
         wsDriver.connect(url)
       } else {
-        sseDriver.connect(url)
+        sseDriver.connect(
+          url,
+          state.model.headers,
+          (entry) => state.log.push(incoming(entry)),
+          (entry) => state.log.push(entry),
+          () => {
+            state.connected = false
+          },
+          () => {
+            state.connected = true
+          },
+        )
       }
     } catch (error) {
       state.log.push(createLogEntry('in', 'text', (error as Error).message))
@@ -168,7 +178,11 @@
 
   const onSend = () => {
     if (!validateFields()) return
-    wsDriver.send(state.message, state.model.encoding)
+    try {
+      wsDriver.send(state.message, state.model.encoding)
+    } catch (error) {
+      state.log.push(createLogEntry('out', 'text', (error as Error).message))
+    }
   }
 
   watch(
