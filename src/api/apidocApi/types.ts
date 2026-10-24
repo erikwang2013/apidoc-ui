@@ -100,6 +100,7 @@ export interface ApiDebugInfo {
   debugReason?: string
   fields: ApiDebugField[]
   defaults: Record<string, unknown>
+  meta?: Record<string, unknown>
   responseEncoding: 'text' | 'json' | 'hex' | 'base64'
   hints?: string
 }

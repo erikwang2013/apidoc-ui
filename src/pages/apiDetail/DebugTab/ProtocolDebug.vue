@@ -19,6 +19,12 @@
       type="warning"
       :message="debug.debugReason || t('apiPage.debug.protocolRelayDisabled')"
     />
+    <a-alert
+      v-if="debug?.hints"
+      class="protocol-debug-hints"
+      type="info"
+      :message="debug.hints"
+    />
     <div v-if="isRelay" class="protocol-debug-relay">
       <protocol-fields ref="fieldsRef" v-model="state.model" :detail="props.detail" />
       <div class="protocol-debug-actions">
@@ -441,5 +447,8 @@
   }
   .protocol-debug-relay {
     margin-top: 12px;
+  }
+  .protocol-debug-hints {
+    margin-top: 8px;
   }
 </style>

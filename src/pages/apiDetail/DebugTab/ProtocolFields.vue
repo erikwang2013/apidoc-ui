@@ -117,7 +117,11 @@
     ['header', 'query', 'body', 'meta'].map((key) => ({
       key,
       fields: fields.value
-        .filter((field) => (field.in ?? 'meta') === key)
+        // encoding 由下方独立的顶层下拉控制,不能再作为 fields.encoding 提交
+        .filter(
+          (field) =>
+            (field.in ?? 'meta') === key && !(key === 'meta' && field.name === 'encoding'),
+        )
         .map((field) => toView(field)),
     })),
   )
@@ -230,8 +234,10 @@
   const init = () => {
     const values: Record<string, unknown> = {}
     const defaults = (debug.value?.defaults ?? {}) as Record<string, unknown>
+    const meta = (debug.value?.meta ?? {}) as Record<string, unknown>
     for (const field of fields.value) {
-      const fallback = field.default !== undefined ? field.default : defaults[field.name]
+      const fallback =
+        field.default !== undefined ? field.default : (defaults[field.name] ?? meta[field.name])
       values[`${field.in ?? 'meta'}|${field.name}`] = normalise(field, fallback)
     }
     if (!('target|target' in values)) {
