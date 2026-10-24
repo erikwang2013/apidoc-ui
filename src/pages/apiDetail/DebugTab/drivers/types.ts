@@ -7,6 +7,9 @@ export interface DebugLogEntry {
   direction: 'in' | 'out'
   encoding: DebugEncoding
   body: string
+  type?: string
+  status?: number | string
+  meta?: Record<string, unknown>
 }
 
 export interface ProtocolDebugModel {

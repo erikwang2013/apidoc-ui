@@ -9,6 +9,8 @@
       <div class="response-log-meta">
         <span>{{ entry.time }}</span>
         <a-tag :color="entry.direction === 'in' ? 'green' : 'blue'">{{ entry.direction }}</a-tag>
+        <span v-if="entry.type">{{ entry.type }}</span>
+        <span v-if="entry.status !== undefined">{{ entry.status }}</span>
         <span>{{ entry.encoding }}</span>
         <span>{{ byteLength(entry) }} {{ t('apiPage.debug.protocolBytes') }}</span>
       </div>
