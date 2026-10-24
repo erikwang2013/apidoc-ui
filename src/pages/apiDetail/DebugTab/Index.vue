@@ -1,5 +1,6 @@
 <template>
-  <div>
+  <ProtocolDebug v-if="showProtocolDebug" :detail="props.detail" />
+  <div v-else>
     <Params ref="paramsRef" :detail="props.detail" />
     <div class="excute-buttons">
       <a-button type="primary" :loading="state.loading" block @click="onExcute">{{
@@ -18,6 +19,7 @@
   import { ApiDetailResult } from '/@/api/apidocApi/types'
   import Params from './Params/Index.vue'
   import Responses from './Responses/Index.vue'
+  import ProtocolDebug from './ProtocolDebug.vue'
   import useDebugApi from '/@/hooks/useDebugApi'
 
   const { t } = useI18n()
@@ -39,6 +41,10 @@
     loading: false,
     resultData: {},
   })
+
+  const showProtocolDebug = computed(
+    () => !!props.detail.debug && props.detail.debug.mode !== 'browser-http',
+  )
 
   const onExcute = () => {
     const paramsData = paramsRef.value.getData()
