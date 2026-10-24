@@ -6,4 +6,7 @@ export interface DebugRunParams {
 
 export interface DebugPollParams {
   sessionId: string
+  appKey?: string
+  shareKey?: string
+  lang?: string
 }

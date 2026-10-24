@@ -230,12 +230,14 @@
   }
 
   // ---------- 中继调试 ----------
-  const POLL_DELAY = 300
+  // 1100ms 保证持续返回消息时也不超过后端 60 次/分钟的限流;主要节奏由后端长轮询承担
+  const POLL_DELAY = 1100
   let sendSeq = 0
   let streamSeq = 0
   let pollTimer: ReturnType<typeof setTimeout> | null = null
   let renewing = false
   let streamInput: ProtocolDebugModel | null = null
+  let streamDetail: ApiDetailResult | null = null
 
   const errorText = (error: unknown) => {
     const err = error as {
@@ -286,14 +288,18 @@
   const endStream = async (notify = true) => {
     clearPoll()
     const sessionId = state.sessionId
+    const detail = streamDetail
     state.sessionId = ''
     state.streaming = false
+    // 无论 start 是否仍在途都必须复位,否则 Connect 会一直转圈
+    state.sending = false
     renewing = false
     streamInput = null
+    streamDetail = null
     streamSeq++
-    if (notify && sessionId) {
+    if (notify && sessionId && detail) {
       try {
-        await stopStream(sessionId)
+        await stopStream(detail, sessionId)
       } catch (error) {
         // 会话到期后服务端自行回收,关闭失败无需提示
       }
@@ -315,10 +321,11 @@
   }
 
   const pollOnce = async (seq: number) => {
-    if (seq !== streamSeq || !state.sessionId) return
+    if (seq !== streamSeq || !state.sessionId || !streamDetail) return
     const sessionId = state.sessionId
+    const detail = streamDetail
     try {
-      const result = await pollStream(sessionId)
+      const result = await pollStream(detail, sessionId)
       if (seq !== streamSeq) return
       if (result.ok === false) {
         const expired = /session not found or expired/i.test(result.error ?? '')
@@ -343,21 +350,24 @@
 
   const startSession = async (input: ProtocolDebugModel, renew: boolean) => {
     const seq = ++streamSeq
+    const detail = props.detail
     clearPoll()
     streamInput = input
+    streamDetail = detail
     renewing = renew
     state.sending = true
     try {
-      const result: RelayStartResult = await startStream(props.detail, input)
+      const result: RelayStartResult = await startStream(detail, input)
       if (seq !== streamSeq) {
-        // detail 已切换或已手动停止,回收刚建立的会话
-        if (result.sessionId) stopStream(result.sessionId).catch(() => {})
+        // 已停止或 detail 已切换:回收刚建立的会话,且不得回写流状态
+        if (result.sessionId) stopStream(detail, result.sessionId).catch(() => {})
         return
       }
       if (!result.sessionId) {
         state.log.push(errorEntry(result.error ?? ''))
         state.streaming = false
         streamInput = null
+        streamDetail = null
         renewing = false
         return
       }
@@ -369,6 +379,7 @@
       state.log.push(errorEntry(errorText(error)))
       state.streaming = false
       streamInput = null
+      streamDetail = null
       renewing = false
     } finally {
       if (seq === streamSeq) state.sending = false
