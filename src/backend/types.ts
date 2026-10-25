@@ -84,9 +84,14 @@ export interface Capabilities {
   features: Features
 }
 
+export interface DebugRunScope extends DebugRunParams {
+  shareKey?: string
+  lang?: string
+}
+
 export interface DebugAdapter {
-  send(params: DebugRunParams): Promise<ApiDebugResult>
-  start(params: DebugRunParams): Promise<RelayStartResult>
+  send(params: DebugRunScope): Promise<ApiDebugResult>
+  start(params: DebugRunScope): Promise<RelayStartResult>
   poll(params: DebugPollParams): Promise<RelayPollResult>
   stop(params: DebugPollParams): Promise<{ ok?: boolean }>
 }

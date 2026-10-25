@@ -1,16 +1,26 @@
 <template>
   <a-dropdown
     v-if="
-      (appStore.serverConfig.generator && appStore.serverConfig.generator.length) ||
-      (appStore.serverConfig.cache && appStore.serverConfig.cache.enable) ||
-      (appStore.serverConfig.share && appStore.serverConfig.share.enable) ||
-      appStore.appKey
+      (can('generator.forms') &&
+        appStore.serverConfig.generator &&
+        appStore.serverConfig.generator.length) ||
+      (can('cache.manage') &&
+        appStore.serverConfig.cache &&
+        appStore.serverConfig.cache.enable) ||
+      (can('share.records') &&
+        appStore.serverConfig.share &&
+        appStore.serverConfig.share.enable) ||
+      (appStore.appKey && canExport)
     "
   >
     <template #overlay>
       <a-menu @click="handleMenuClick">
         <a-sub-menu
-          v-if="appStore.serverConfig.generator && appStore.serverConfig.generator.length"
+          v-if="
+            can('generator.forms') &&
+            appStore.serverConfig.generator &&
+            appStore.serverConfig.generator.length
+          "
           key="generator"
           :title="t('generator.title')"
         >
@@ -19,7 +29,11 @@
           }}</a-menu-item>
         </a-sub-menu>
         <a-sub-menu
-          v-if="appStore.serverConfig.cache && appStore.serverConfig.cache.enable"
+          v-if="
+            can('cache.manage') &&
+            appStore.serverConfig.cache &&
+            appStore.serverConfig.cache.enable
+          "
           key="cacheManage"
           :title="t('cache.manage')"
         >
@@ -27,14 +41,24 @@
           <a-menu-item key="createAllApi">{{ t('cache.createAllApi') }}</a-menu-item>
         </a-sub-menu>
         <a-menu-item
-          v-if="appStore.serverConfig.code_template && appStore.serverConfig.code_template.length"
+          v-if="
+            can('generator.templates') &&
+            appStore.serverConfig.code_template &&
+            appStore.serverConfig.code_template.length
+          "
           key="codeTemplate"
           >{{ t('codeTemplate.title') }}</a-menu-item
         >
-        <a-menu-item v-if="appStore.serverConfig.share?.enable" key="apiShare">{{
-          t('apiShare.title')
-        }}</a-menu-item>
-        <a-sub-menu v-if="appStore.appKey" key="exportDoc" :title="t('exportDoc.title')">
+        <a-menu-item
+          v-if="can('share.records') && appStore.serverConfig.share?.enable"
+          key="apiShare"
+          >{{ t('apiShare.title') }}</a-menu-item
+        >
+        <a-sub-menu
+          v-if="appStore.appKey && canExport"
+          key="exportDoc"
+          :title="t('exportDoc.title')"
+        >
           <a-menu-item key="exportMarkdown">{{ t('exportDoc.markdown') }}</a-menu-item>
           <a-menu-item key="exportPdf">{{ t('exportDoc.pdf') }}</a-menu-item>
           <a-menu-item key="exportOpenapi">{{ t('exportDoc.openapi') }}</a-menu-item>
@@ -52,6 +76,7 @@
 
 <script setup lang="ts">
   import { useAppStore } from '/@/store/modules/app'
+  import { featureEnabled } from '/@/backend/gating'
   import { useI18n } from '/@/hooks/useI18n'
   import { MenuInfo } from 'ant-design-vue/lib/menu/src/interface'
   import { AppstoreOutlined, DownOutlined } from '@ant-design/icons-vue'
@@ -71,6 +96,11 @@
   import { buildOpenApiJson, buildPostmanJson, downloadJson } from '/@/utils/apidocExport/json'
 
   const appStore = useAppStore()
+  const can = (path: string) => featureEnabled(appStore.capabilities, path)
+  const canExport = computed(() => {
+    const exports = appStore.capabilities?.features.exports
+    return !exports || exports.length > 0
+  })
 
   const { t } = useI18n()
 

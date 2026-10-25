@@ -8,6 +8,7 @@ import { IResponse } from './type'
 import { FeConfig } from '/@/store/modules/app/types'
 import { getApidocUrls } from '/@/api/index'
 import Cache from '/@/utils/cache'
+import { authKey } from '/@/utils/helper/authKey'
 import { APP_AUTH } from '/@/store/modules/app/types'
 
 let apidocUrls: string[] = []
@@ -52,13 +53,17 @@ axiosInstance.interceptors.request.use(
       }
       const shareKey = config[dataKey] && config[dataKey].shareKey ? config[dataKey].shareKey : ''
       const authData = Cache.get(APP_AUTH)
+      const host =
+        config.baseURL ||
+        (typeof window !== 'undefined' ? window.location.origin : 'same-origin')
+      const scopedToken = (scope: string) => authData && authData[authKey(host, scope)]
       let token = ''
-      if (shareKey && authData && authData[`shareKey_${shareKey}`]) {
-        token = authData[`shareKey_${shareKey}`]
-      } else if (authData && authData[appKey]) {
-        token = authData[appKey]
-      } else if (authData && authData['global']) {
-        token = authData['global']
+      if (shareKey && scopedToken(`shareKey_${shareKey}`)) {
+        token = scopedToken(`shareKey_${shareKey}`)
+      } else if (scopedToken(appKey)) {
+        token = scopedToken(appKey)
+      } else if (scopedToken('global')) {
+        token = scopedToken('global')
       }
       if (token) {
         if (config[dataKey]) {

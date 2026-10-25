@@ -117,8 +117,8 @@
 </script>
 
 <script lang="ts" setup>
-  import apidocApi from '/@/api/apidocApi'
   import { useAppStore } from '/@/store'
+  import { getBackend } from '/@/backend/state'
   import { useRoute } from 'vue-router'
   import { ApiDetailResult } from '/@/api/apidocApi/types'
   import { TextGrid, TextItem } from '/@/components/TextGrid'
@@ -142,7 +142,7 @@
   import DebugTab from './DebugTab/Index.vue'
   import ProtocolTab from './ProtocolTab/Index.vue'
   import ProtocolBadge from '/@/components/ProtocolBadge'
-  import { IResponse } from '/@/utils/http/axios/type'
+  import { debugModeEnabled, featureEnabled } from '/@/backend/gating'
   import { DeviceEnum } from '/@/enums/appEnum'
   const route = useRoute()
 
@@ -214,15 +214,14 @@
     const query = route.query
 
     state[loadField] = true
-    apidocApi
-      .getApiDetail({
+    getBackend()
+      .detail({
         appKey: query.appKey ? (query.appKey as string) : appStore.appKey,
         path: query.key as string,
         lang: query.lang ? (query.lang as string) : appStore.lang,
         shareKey: query.shareKey ? (query.shareKey as string) : appStore.shareKey,
       })
-      .then((res: IResponse<ApiDetailResult>) => {
-        let data = res.data
+      .then((data: ApiDetailResult) => {
         if (data.query) {
           data.query = handleTableDataRowKey(data.query)
         }
@@ -234,10 +233,19 @@
         }
         state.detail = data
         let nextTabs = tabs.includes('protocol') ? [...tabs] : [...tabs, 'protocol']
-        if (!data.protocol) {
+        if (
+          !data.protocol ||
+          !featureEnabled(appStore.capabilities, 'protocolDefinitions') ||
+          (!data.definitions?.length && data.protocol.http)
+        ) {
           nextTabs = nextTabs.filter((p) => p != 'protocol')
         }
-        if (data.notDebug || (data.protocol && data.protocol.debuggable === false)) {
+        if (
+          data.notDebug ||
+          (data.protocol && data.protocol.debuggable === false) ||
+          (data.debug && data.debug.debuggable === false) ||
+          !debugModeEnabled(appStore.capabilities, data.debug?.mode)
+        ) {
           nextTabs = nextTabs.filter((p) => p != 'debug')
         }
         state.tabs = nextTabs
@@ -251,7 +259,8 @@
       })
       .catch((err) => {
         state[loadField] = false
-        if (err.data && err.data.code != 0) {
+        const code = err?.data?.code ?? err?.response?.data?.code
+        if (code != null && code != 0) {
           state.error = err
           state[loadField] = false
           return

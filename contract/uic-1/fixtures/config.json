@@ -80,7 +80,7 @@
             "protocolDefinitions": true,
             "debug": {
               "browser": ["http", "websocket", "sse"],
-              "relay": ["raw", "http", "mqtt", "stomp", "coap", "modbus", "iso8583", "rtsp", "sip", "grpc", "hessian", "hls"],
+              "relay": ["raw", "http-relay", "mqtt", "stomp", "coap", "modbus-tcp", "iso8583", "rtsp", "sip", "grpc", "hessian", "hls"],
               "modes": ["browser-http", "browser-websocket", "browser-sse", "relay-unary", "relay-stream"]
             },
             "share": { "link": true, "records": true, "actions": true },

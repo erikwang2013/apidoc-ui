@@ -53,8 +53,10 @@ export function createUicAdapter(
   options: UicAdapterOptions = {},
 ): BackendAdapter {
   const getToken = options.getToken ?? (() => undefined)
-  const tokenFor = (params: { appKey?: string; shareKey?: string }) =>
-    getToken(scopeOf(params))
+  const tokenFor = (params: { appKey?: string; shareKey?: string }) => {
+    const scope = scopeOf(params)
+    return getToken(scope) || (scope.startsWith('shareKey_') ? undefined : getToken('global'))
+  }
 
   const config = async (params: ConfigParams & { shareKey?: string }) => {
     const input = { ...params }

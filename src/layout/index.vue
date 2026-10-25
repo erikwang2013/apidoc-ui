@@ -22,6 +22,8 @@
   import { useAppStore, useApidocStore } from '/@/store'
   import LoadingCard from '/@/components/LoadingCard'
   import useDevice from '/@/hooks/useDevice'
+  import { initBackend } from '/@/backend'
+  import { BackendDetectionError } from '/@/backend/detect'
   import { ApiMenusParams } from '/@/api/apidocApi/types'
   import { useRoute, useRouter } from 'vue-router'
   const route = useRoute()
@@ -88,8 +90,8 @@
     appStore.setShareKey(route.query.shareKey)
   }
 
-  appStore
-    .fetchSeverConfig(params)
+  initBackend()
+    .then(() => appStore.fetchSeverConfig(params))
     .then(({ appKey, config }) => {
       apidocStore.fetchApiMenus({ ...params, appKey })
       apidocStore.fetchDocsMenus({ ...params, appKey })
@@ -97,6 +99,15 @@
       apidocStore.initGlobalParams(config)
     })
     .catch((error) => {
+      if (error instanceof BackendDetectionError) {
+        appStore.setGlobalError({
+          config: { baseURL: '', url: '' },
+          message: error.message,
+          response: { status: 0, data: { code: 500, message: error.message } },
+        } as any)
+        state.loading = false
+        return
+      }
       handleApidocHttpError(error).then((res) => {
         if (res === false) {
           appStore.setGlobalError(error)

@@ -2,16 +2,10 @@ import { defineStore } from 'pinia'
 import piniaStore from '/@/store/index'
 import { ApidocState, GLOBALPARAMS } from './types'
 import { ConfigGlobalParams } from '/@/api/globalApi/types'
-import apidocApi from '../../../api/apidocApi'
-import {
-  DocMenusItem,
-  ApiMenusParams,
-  ApiMenusResult,
-  DocMenusParams,
-} from '../../../api/apidocApi/types'
+import { DocMenusItem, ApiMenusParams, ApiMenusResult, DocMenusParams } from '../../../api/apidocApi/types'
+import { getBackend } from '/@/backend/state'
 import { handleApiData, handleDocMenusData } from './helper'
 import Cache from '/@/utils/cache'
-import { IResponse } from '/@/utils/http/axios/type'
 import { handleApidocHttpError } from '/@/utils/http/axios/handleError'
 import { useAppOutsideStore } from '/@/store/modules/app/index'
 import { ConfigGlobalParamItem, ConfigResult } from '/@/api/globalApi/types'
@@ -44,13 +38,13 @@ export const useApidocStore = defineStore('apidoc', {
     },
     fetchApiMenus(params: ApiMenusParams) {
       return new Promise((resolve, reject) => {
-        apidocApi
-          .getApiMenus(params)
-          .then((res: IResponse<ApiMenusResult>) => {
-            const { apiMenus, dashboard } = handleApiData(res.data)
+        getBackend()
+          .menus(params)
+          .then((result: ApiMenusResult) => {
+            const { apiMenus, dashboard } = handleApiData(result)
             this.apiMenus = apiMenus
             this.dashboard = { ...this.dashboard, ...dashboard }
-            resolve(res)
+            resolve(result)
           })
           .catch((error) => {
             const appStore = useAppOutsideStore()
@@ -67,17 +61,17 @@ export const useApidocStore = defineStore('apidoc', {
     },
     fetchDocsMenus(params: DocMenusParams) {
       return new Promise((resolve, reject) => {
-        apidocApi
-          .getDocMenus(params)
-          .then((res: IResponse<DocMenusItem[]>) => {
-            const { menus, count } = handleDocMenusData(res.data)
+        getBackend()
+          .docsMenus(params)
+          .then((result: DocMenusItem[]) => {
+            const { menus, count } = handleDocMenusData(result)
             this.docsMenus = menus
             this.dashboard = {
               ...this.dashboard,
               docsCount: count,
             }
 
-            resolve(res)
+            resolve(result)
           })
           .catch((error) => {
             const appStore = useAppOutsideStore()

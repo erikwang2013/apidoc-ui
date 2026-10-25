@@ -67,9 +67,21 @@ export function createPhpLegacyAdapter(
 ): BackendAdapter {
   const debug: DebugAdapter = {
     send: async (params: DebugRunScope) =>
-      payload(api.debugSend({ ...params, path: decodePath(params.path) })),
+      payload(
+        api.debugSend({
+          appKey: params.appKey,
+          path: decodePath(params.path),
+          input: params.input,
+        }),
+      ),
     start: async (params: DebugRunScope) =>
-      payload(api.debugStart({ ...params, path: decodePath(params.path) })),
+      payload(
+        api.debugStart({
+          appKey: params.appKey,
+          path: decodePath(params.path),
+          input: params.input,
+        }),
+      ),
     poll: async (params: DebugPollParams) => payload(api.debugPoll(params)),
     stop: async (params: DebugPollParams) => payload(api.debugStop(params)),
   }
