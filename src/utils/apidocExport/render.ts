@@ -81,6 +81,35 @@ function apiSections(node: DocNode): string {
   const parts: string[] = []
   const intro = d.md && d.md.trim() ? d.md.trim() : (d.desc && d.desc.trim()) || ''
   if (intro) parts.push(intro)
+  if (d.protocol) {
+    const channel = d.channel ? ` · ${d.channel.action || ''} \`${d.channel.address}\`` : ''
+    parts.push(`**协议：** ${d.protocol.label}${channel}`)
+  }
+  for (const def of d.definitions || []) {
+    const title = `#### ${def.format} · ${def.source}${
+      def.operation ? ` · ${def.operation}` : ''
+    }`
+    const body: string[] = []
+    for (const msg of def.messages || []) {
+      const table = paramsSection(`${msg.direction}: ${msg.name}`, msg.fields, false)
+      if (table) body.push(table)
+      if (msg.sampleValidation && !msg.sampleValidation.ok) {
+        body.push(
+          `**样例校验错误：**\n\n${msg.sampleValidation.errors
+            .map((e) => `- ${e.message}`)
+            .join('\n')}`,
+        )
+      }
+    }
+    if (!def.validation.ok && def.validation.errors.length) {
+      body.push(
+        `**校验错误：**\n\n${def.validation.errors
+          .map((e) => `- ${e.line ? `${e.line}:${e.column || 0} ` : ''}${e.message}`)
+          .join('\n')}`,
+      )
+    }
+    parts.push([title, ...body].join('\n\n'))
+  }
   ;(['header', 'routeParam', 'query', 'param'] as const).forEach((key) => {
     const section = paramsSection(LABELS[key], (d as any)[key], false)
     if (section) parts.push(section)
