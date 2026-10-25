@@ -14,7 +14,9 @@ PHP_DIR="${APIDOC_PHP_DIR:-$TREES/php}"
 GO_DIR="${APIDOC_GO_DIR:-$TREES/go}"
 RUST_DIR="${APIDOC_RUST_DIR:-$TREES/rust}"
 PHP_HOST="${UIC1_PHP_HOST:-127.0.0.1}"
-PHP_PORT="${UIC1_PHP_PORT:-18081}"
+# 18081 is often occupied by an unrelated local server; keep 18091 as the
+# default and allow an override for CI or other hosts.
+PHP_PORT="${UIC1_PHP_PORT:-18091}"
 GO_TIMEOUT="${UIC1_GO_TIMEOUT:-900}"
 RUST_TIMEOUT="${UIC1_RUST_TIMEOUT:-1800}"
 BASE="http://$PHP_HOST:$PHP_PORT/apidoc/ui/v1"
