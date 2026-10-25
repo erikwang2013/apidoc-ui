@@ -1,0 +1,497 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://apidoc.local/contract/uic-1/schema.json",
+  "title": "Apidoc UI Contract 1.0",
+  "description": "Shared contract between apidoc-ui and the PHP, Go and Rust backends. Success responses use {code:0,message:'ok',data}, failures use {code,message}.",
+  "type": "object",
+  "$defs": {
+    "Envelope": {
+      "type": "object",
+      "required": ["code", "message"],
+      "properties": {
+        "code": { "type": "integer" },
+        "message": { "type": "string" },
+        "data": {}
+      },
+      "additionalProperties": true
+    },
+    "Error": {
+      "type": "object",
+      "required": ["code", "message"],
+      "properties": {
+        "code": { "type": "integer" },
+        "message": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "DebugFeatures": {
+      "type": "object",
+      "required": ["browser", "relay", "modes"],
+      "properties": {
+        "browser": { "type": "array", "items": { "type": "string" } },
+        "relay": { "type": "array", "items": { "type": "string" } },
+        "modes": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "browser-http",
+              "browser-websocket",
+              "browser-sse",
+              "relay-unary",
+              "relay-stream"
+            ]
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "Capabilities": {
+      "type": "object",
+      "required": ["contract", "backend", "version", "features"],
+      "properties": {
+        "contract": { "type": "string" },
+        "backend": { "enum": ["php", "go", "rust"] },
+        "version": { "type": "string" },
+        "features": {
+          "type": "object",
+          "required": [
+            "menus",
+            "detail",
+            "docs",
+            "protocolDefinitions",
+            "debug",
+            "share",
+            "cache",
+            "generator",
+            "exports",
+            "auth"
+          ],
+          "properties": {
+            "menus": { "type": "boolean" },
+            "detail": { "type": "boolean" },
+            "docs": { "type": "boolean" },
+            "protocolDefinitions": { "type": "boolean" },
+            "debug": { "$ref": "#/$defs/DebugFeatures" },
+            "share": {
+              "type": "object",
+              "required": ["link", "records", "actions"],
+              "properties": {
+                "link": { "type": "boolean" },
+                "records": { "type": "boolean" },
+                "actions": { "type": "boolean" }
+              },
+              "additionalProperties": true
+            },
+            "cache": {
+              "type": "object",
+              "required": ["manage", "mode"],
+              "properties": {
+                "manage": { "type": "boolean" },
+                "mode": { "enum": ["server", "build"] }
+              },
+              "additionalProperties": true
+            },
+            "generator": {
+              "type": "object",
+              "required": ["forms", "templates", "sideEffects"],
+              "properties": {
+                "forms": { "type": "boolean" },
+                "templates": { "type": "boolean" },
+                "sideEffects": { "type": "boolean" }
+              },
+              "additionalProperties": true
+            },
+            "exports": {
+              "type": "array",
+              "items": {
+                "enum": ["md", "pdf", "openapi", "postman", "asyncapi", "typescript"]
+              }
+            },
+            "auth": {
+              "type": "object",
+              "required": ["global", "app", "shareToken"],
+              "properties": {
+                "global": { "type": "boolean" },
+                "app": { "type": "boolean" },
+                "shareToken": { "type": "boolean" }
+              },
+              "additionalProperties": true
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "Param": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string" },
+        "type": { "type": "string" },
+        "desc": { "type": "string" },
+        "require": { "type": "boolean" },
+        "default": {},
+        "mock": { "type": "string" },
+        "childrenType": { "type": "string" },
+        "in": { "enum": ["target", "header", "query", "body", "meta", "path"] },
+        "children": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Param" }
+        }
+      },
+      "additionalProperties": true
+    },
+    "GlobalParams": {
+      "type": "object",
+      "properties": {
+        "header": { "type": "array", "items": { "$ref": "#/$defs/Param" } },
+        "query": { "type": "array", "items": { "$ref": "#/$defs/Param" } },
+        "body": { "type": "array", "items": { "$ref": "#/$defs/Param" } }
+      },
+      "additionalProperties": true
+    },
+    "AppItem": {
+      "type": "object",
+      "required": ["key", "title", "path"],
+      "properties": {
+        "key": { "type": "string" },
+        "title": { "type": "string" },
+        "path": { "type": "string" },
+        "host": { "type": "string" },
+        "hasPassword": { "type": "boolean" },
+        "folder": { "type": "string" },
+        "groups": { "type": "array", "items": { "type": "object" } },
+        "items": { "type": "array", "items": { "$ref": "#/$defs/AppItem" } },
+        "params": { "$ref": "#/$defs/GlobalParams" },
+        "responses": { "type": "object" }
+      },
+      "additionalProperties": true
+    },
+    "GeneratorFile": {
+      "type": "object",
+      "required": ["name", "path", "content"],
+      "properties": {
+        "name": { "type": "string" },
+        "path": { "type": "string" },
+        "content": { "type": "string" },
+        "namespace": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "GeneratorItem": {
+      "type": "object",
+      "required": ["name", "title", "files"],
+      "properties": {
+        "name": { "type": "string" },
+        "title": { "type": "string" },
+        "files": { "type": "array", "items": { "$ref": "#/$defs/GeneratorFile" } },
+        "form": { "type": "object" },
+        "table": { "type": "object" }
+      },
+      "additionalProperties": true
+    },
+    "CodeTemplateItem": {
+      "type": "object",
+      "required": ["title", "template"],
+      "properties": {
+        "title": { "type": "string" },
+        "template": { "type": "string" },
+        "select_mode": { "enum": ["controller", "api"] },
+        "multiple": { "type": "boolean" },
+        "language": { "type": "string" },
+        "tips": { "type": "string" },
+        "limit": { "type": "integer" },
+        "form": { "type": "object" }
+      },
+      "additionalProperties": true
+    },
+    "Config": {
+      "type": "object",
+      "required": ["apps"],
+      "properties": {
+        "title": { "type": "string" },
+        "desc": { "type": "string" },
+        "apps": { "type": "array", "items": { "$ref": "#/$defs/AppItem" } },
+        "cache": { "type": "object" },
+        "params": { "$ref": "#/$defs/GlobalParams" },
+        "responses": { "type": "object" },
+        "generator": { "type": "array", "items": { "$ref": "#/$defs/GeneratorItem" } },
+        "code_template": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/CodeTemplateItem" }
+        },
+        "share": { "type": "object" },
+        "export_config": { "type": "object" },
+        "capabilities": { "$ref": "#/$defs/Capabilities" }
+      },
+      "additionalProperties": true
+    },
+    "MenuItem": {
+      "type": "object",
+      "required": ["menuKey", "title", "name"],
+      "properties": {
+        "menuKey": { "type": "string" },
+        "name": { "type": "string" },
+        "title": { "type": "string" },
+        "type": { "type": "string" },
+        "method": {},
+        "url": { "type": "string" },
+        "controller": { "type": "string" },
+        "group": { "type": "string" },
+        "path": { "type": "string" },
+        "appKey": { "type": "string" },
+        "tag": {},
+        "author": { "type": "string" },
+        "protocolKey": { "type": "string" },
+        "protocolLabel": { "type": "string" },
+        "channelAddress": { "type": "string" },
+        "notDebug": { "type": "boolean" },
+        "children": { "type": "array", "items": { "$ref": "#/$defs/MenuItem" } }
+      },
+      "additionalProperties": true
+    },
+    "MenusData": {
+      "type": "object",
+      "required": ["app", "data"],
+      "properties": {
+        "app": { "$ref": "#/$defs/AppItem" },
+        "data": { "type": "array", "items": { "$ref": "#/$defs/MenuItem" } },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "groups": { "type": "array", "items": { "type": "object" } }
+      },
+      "additionalProperties": true
+    },
+    "ProtocolInfo": {
+      "type": "object",
+      "required": ["name", "label"],
+      "properties": {
+        "name": { "type": "string" },
+        "label": { "type": "string" },
+        "version": { "type": "string" },
+        "transport": { "type": "string" },
+        "mode": { "type": "string" },
+        "http": { "type": "boolean" },
+        "debuggable": { "type": "boolean" },
+        "debugReason": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "ChannelInfo": {
+      "type": "object",
+      "required": ["address"],
+      "properties": {
+        "address": { "type": "string" },
+        "action": { "type": "string" },
+        "meta": { "type": "object" }
+      },
+      "additionalProperties": true
+    },
+    "DebugField": {
+      "allOf": [{ "$ref": "#/$defs/Param" }],
+      "properties": {
+        "in": { "enum": ["target", "header", "query", "body", "meta"] }
+      }
+    },
+    "DebugInfo": {
+      "type": "object",
+      "required": ["mode", "driver", "debuggable", "fields", "defaults", "responseEncoding"],
+      "properties": {
+        "mode": {
+          "enum": [
+            "browser-http",
+            "browser-websocket",
+            "browser-sse",
+            "relay-unary",
+            "relay-stream"
+          ]
+        },
+        "driver": { "type": "string" },
+        "relayEnabled": { "type": "boolean" },
+        "debuggable": { "type": "boolean" },
+        "debugReason": { "type": "string" },
+        "fields": { "type": "array", "items": { "$ref": "#/$defs/DebugField" } },
+        "defaults": { "type": "object" },
+        "meta": { "type": "object" },
+        "responseEncoding": { "enum": ["text", "json", "hex", "base64"] },
+        "hints": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "Validation": {
+      "type": "object",
+      "required": ["ok", "errors", "warnings"],
+      "properties": {
+        "ok": { "type": "boolean" },
+        "errors": { "type": "array", "items": { "type": "object" } },
+        "warnings": { "type": "array", "items": { "type": "object" } }
+      },
+      "additionalProperties": true
+    },
+    "Message": {
+      "type": "object",
+      "required": ["name", "direction", "fields"],
+      "properties": {
+        "name": { "type": "string" },
+        "direction": { "enum": ["request", "response", "event", "notification"] },
+        "fields": { "type": "array", "items": { "$ref": "#/$defs/Param" } },
+        "sample": { "type": "string" },
+        "sampleValidation": { "$ref": "#/$defs/Validation" }
+      },
+      "additionalProperties": true
+    },
+    "Definition": {
+      "type": "object",
+      "required": ["format", "source", "messages", "validation"],
+      "properties": {
+        "format": { "type": "string" },
+        "source": { "type": "string" },
+        "operation": { "type": "string" },
+        "meta": { "type": "object" },
+        "messages": { "type": "array", "items": { "$ref": "#/$defs/Message" } },
+        "validation": { "$ref": "#/$defs/Validation" }
+      },
+      "additionalProperties": true
+    },
+    "Detail": {
+      "type": "object",
+      "required": ["menuKey", "title", "method", "url"],
+      "properties": {
+        "menuKey": { "type": "string" },
+        "name": { "type": "string" },
+        "title": { "type": "string" },
+        "method": {},
+        "url": { "type": "string" },
+        "appKey": { "type": "string" },
+        "author": { "type": "string" },
+        "tag": {},
+        "desc": { "type": "string" },
+        "md": { "type": "string" },
+        "contentType": { "type": "string" },
+        "paramType": { "type": "string" },
+        "notDebug": { "type": "boolean" },
+        "header": { "type": "array", "items": { "$ref": "#/$defs/Param" } },
+        "query": { "type": "array", "items": { "$ref": "#/$defs/Param" } },
+        "routeParam": { "type": "array", "items": { "$ref": "#/$defs/Param" } },
+        "param": { "type": "array", "items": { "$ref": "#/$defs/Param" } },
+        "responseSuccess": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Param" }
+        },
+        "responseError": { "type": "array", "items": { "$ref": "#/$defs/Param" } },
+        "responseStatus": { "type": "array", "items": { "type": "object" } },
+        "responseSuccessMd": { "type": "string" },
+        "responseErrorMd": { "type": "string" },
+        "protocol": { "$ref": "#/$defs/ProtocolInfo" },
+        "channel": { "$ref": "#/$defs/ChannelInfo" },
+        "debug": { "$ref": "#/$defs/DebugInfo" },
+        "definitions": { "type": "array", "items": { "$ref": "#/$defs/Definition" } },
+        "validation": { "$ref": "#/$defs/Validation" }
+      },
+      "additionalProperties": true
+    },
+    "DebugResult": {
+      "type": "object",
+      "required": ["ok"],
+      "properties": {
+        "ok": { "type": "boolean" },
+        "status": {},
+        "headers": { "type": "object" },
+        "body": { "type": "string" },
+        "encoding": { "enum": ["text", "json", "hex", "base64"] },
+        "meta": { "type": "object" },
+        "error": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "RelayMessage": {
+      "type": "object",
+      "properties": {
+        "time": { "type": "string" },
+        "type": { "type": "string" },
+        "body": { "type": "string" },
+        "encoding": { "enum": ["text", "json", "hex", "base64"] }
+      },
+      "additionalProperties": true
+    },
+    "RelayStart": {
+      "type": "object",
+      "required": ["ok"],
+      "properties": {
+        "ok": { "type": "boolean" },
+        "sessionId": { "type": "string" },
+        "error": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "RelayPoll": {
+      "type": "object",
+      "required": ["ok"],
+      "properties": {
+        "ok": { "type": "boolean" },
+        "messages": { "type": "array", "items": { "$ref": "#/$defs/RelayMessage" } },
+        "error": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "ShareRecord": {
+      "type": "object",
+      "required": ["key", "name", "type"],
+      "properties": {
+        "key": { "type": "string" },
+        "name": { "type": "string" },
+        "type": { "enum": ["all", "app", "api"] },
+        "appKeys": { "type": "array", "items": { "type": "string" } },
+        "apiKeys": { "type": "array", "items": { "type": "string" } },
+        "create_time": { "type": "string" },
+        "create_at": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "ShareList": {
+      "type": "object",
+      "required": ["total", "data"],
+      "properties": {
+        "total": { "type": "integer" },
+        "data": { "type": "array", "items": { "$ref": "#/$defs/ShareRecord" } }
+      },
+      "additionalProperties": true
+    },
+    "GeneratorResult": {
+      "type": "object",
+      "required": ["files"],
+      "properties": {
+        "files": { "type": "array", "items": { "$ref": "#/$defs/GeneratorFile" } }
+      },
+      "additionalProperties": true
+    },
+    "CodeTemplateResult": {
+      "type": "object",
+      "required": ["code"],
+      "properties": { "code": { "type": "string" } },
+      "additionalProperties": true
+    },
+    "ExportAppNode": {
+      "type": "object",
+      "properties": {
+        "key": { "type": "string" },
+        "title": { "type": "string" },
+        "appKey": { "type": "string" },
+        "menuKey": { "type": "string" },
+        "children": { "type": "array", "items": {} }
+      },
+      "additionalProperties": true
+    },
+    "ExportAllData": {
+      "type": "object",
+      "required": ["apiData"],
+      "properties": {
+        "apiData": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ExportAppNode" }
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}

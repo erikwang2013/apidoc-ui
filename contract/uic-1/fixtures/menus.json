@@ -1,0 +1,52 @@
+[
+  {
+    "name": "php-http-and-ws",
+    "request": { "appKey": "default" },
+    "response": {
+      "code": 0,
+      "message": "ok",
+      "data": {
+        "app": { "key": "default", "title": "Default", "path": "default" },
+        "data": [
+          {
+            "controller": "users",
+            "path": "users",
+            "appKey": "default",
+            "title": "Users",
+            "name": "users",
+            "menuKey": "users-controller",
+            "group": "Core",
+            "children": [
+              {
+                "name": "listUsers",
+                "title": "List users",
+                "menuKey": "users%40listUsers",
+                "method": "GET",
+                "url": "/users",
+                "controller": "users",
+                "tag": ["users"],
+                "author": "erik",
+                "notDebug": false
+              },
+              {
+                "name": "chat",
+                "title": "Chat",
+                "menuKey": "ws%40chat",
+                "method": "*",
+                "url": "wss://example.com/chat",
+                "controller": "users",
+                "tag": ["ws"],
+                "author": "erik",
+                "protocolKey": "websocket",
+                "protocolLabel": "WebSocket",
+                "channelAddress": "wss://example.com/chat"
+              }
+            ]
+          }
+        ],
+        "tags": ["users", "ws"],
+        "groups": [{ "name": "Core", "title": "Core" }]
+      }
+    }
+  }
+]

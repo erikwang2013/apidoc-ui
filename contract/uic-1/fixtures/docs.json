@@ -1,0 +1,34 @@
+[
+  {
+    "name": "doc-menus",
+    "request": { "appKey": "default" },
+    "response": {
+      "code": 0,
+      "message": "ok",
+      "data": [
+        {
+          "name": "guide",
+          "title": "Guide",
+          "menuKey": "doc-guide",
+          "children": [
+            {
+              "name": "intro",
+              "title": "Intro",
+              "menuKey": "doc-intro",
+              "path": "guide/intro"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "doc-detail",
+    "request": { "appKey": "default", "path": "guide/intro" },
+    "response": {
+      "code": 0,
+      "message": "ok",
+      "data": { "content": "# Intro\n\nWelcome to the demo API." }
+    }
+  }
+]

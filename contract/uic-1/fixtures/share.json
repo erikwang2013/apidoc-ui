@@ -1,0 +1,66 @@
+[
+  {
+    "name": "share-add",
+    "request": {
+      "name": "Team",
+      "type": "app",
+      "appKeys": ["default"],
+      "password": "secret"
+    },
+    "response": { "code": 0, "message": "ok", "data": true }
+  },
+  {
+    "name": "share-list",
+    "request": { "pageIndex": 1 },
+    "response": {
+      "code": 0,
+      "message": "ok",
+      "data": {
+        "total": 1,
+        "data": [
+          {
+            "key": "share-1",
+            "name": "Team",
+            "type": "app",
+            "appKeys": ["default"],
+            "create_time": "2026-10-26 00:00:00",
+            "create_at": "2026-10-26 00:00:00"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "share-detail",
+    "request": { "key": "share-1" },
+    "response": {
+      "code": 0,
+      "message": "ok",
+      "data": {
+        "key": "share-1",
+        "name": "Team",
+        "type": "app",
+        "appKeys": ["default"],
+        "create_time": "2026-10-26 00:00:00",
+        "create_at": "2026-10-26 00:00:00"
+      }
+    }
+  },
+  {
+    "name": "share-delete",
+    "request": { "key": "share-1" },
+    "response": { "code": 0, "message": "ok", "data": true }
+  },
+  {
+    "name": "share-action",
+    "request": { "key": "share-1", "index": 0 },
+    "response": {
+      "code": 0,
+      "message": "ok",
+      "data": {
+        "action": "copy",
+        "params": { "url": "https://api.example.com/apidoc?app=default" }
+      }
+    }
+  }
+]

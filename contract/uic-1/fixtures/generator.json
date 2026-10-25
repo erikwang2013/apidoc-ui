@@ -1,0 +1,40 @@
+[
+  {
+    "name": "generator-render",
+    "request": {
+      "index": 0,
+      "form": {},
+      "files": [],
+      "tables": []
+    },
+    "response": {
+      "code": 0,
+      "message": "ok",
+      "data": {
+        "files": [
+          {
+            "name": "User.ts",
+            "path": "src/User.ts",
+            "content": "export interface User {}\n"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "code-template-render",
+    "request": {
+      "appKey": "default",
+      "template": "api.ts",
+      "selected": ["users%40listUsers"],
+      "form": {}
+    },
+    "response": {
+      "code": 0,
+      "message": "ok",
+      "data": {
+        "code": "export async function listUsers() {}\n"
+      }
+    }
+  }
+]

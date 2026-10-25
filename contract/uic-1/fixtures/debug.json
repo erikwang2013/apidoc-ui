@@ -1,0 +1,92 @@
+[
+  {
+    "name": "debug-send-http",
+    "request": {
+      "appKey": "default",
+      "path": "users%40listUsers",
+      "input": {
+        "target": "https://api.example.com/users",
+        "headers": { "Accept": "application/json" },
+        "query": { "page": "1" },
+        "fields": {},
+        "payload": "",
+        "encoding": "text",
+        "timeout": 5
+      }
+    },
+    "response": {
+      "code": 0,
+      "message": "ok",
+      "data": {
+        "ok": true,
+        "status": 200,
+        "headers": { "content-type": "application/json" },
+        "body": "{\"id\":1,\"name\":\"erik\"}",
+        "encoding": "json",
+        "meta": { "ms": 12 }
+      }
+    }
+  },
+  {
+    "name": "debug-send-denied",
+    "request": {
+      "appKey": "default",
+      "path": "users%40listUsers",
+      "input": { "target": "http://127.0.0.1:1/", "payload": "", "encoding": "text", "timeout": 5 }
+    },
+    "response": {
+      "code": 0,
+      "message": "ok",
+      "data": { "ok": false, "error": "target not allowed" }
+    }
+  },
+  {
+    "name": "debug-start",
+    "request": {
+      "appKey": "default",
+      "path": "ws%40chat",
+      "input": {
+        "target": "wss://example.com/chat",
+        "headers": {},
+        "query": { "room": "lobby" },
+        "fields": {},
+        "payload": "",
+        "encoding": "text",
+        "timeout": 5
+      }
+    },
+    "response": {
+      "code": 0,
+      "message": "ok",
+      "data": { "ok": true, "sessionId": "0123456789abcdef0123456789abcdef" }
+    }
+  },
+  {
+    "name": "debug-poll",
+    "request": { "sessionId": "0123456789abcdef0123456789abcdef", "appKey": "default" },
+    "response": {
+      "code": 0,
+      "message": "ok",
+      "data": {
+        "ok": true,
+        "messages": [
+          {
+            "time": "2026-10-26T00:00:00Z",
+            "type": "message",
+            "body": "{\"room\":\"lobby\"}",
+            "encoding": "json"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "debug-stop",
+    "request": { "sessionId": "0123456789abcdef0123456789abcdef", "appKey": "default" },
+    "response": {
+      "code": 0,
+      "message": "ok",
+      "data": { "ok": true }
+    }
+  }
+]

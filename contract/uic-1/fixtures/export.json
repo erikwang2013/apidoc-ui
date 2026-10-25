@@ -1,0 +1,71 @@
+[
+  {
+    "name": "export-all-data",
+    "request": { "appKey": "default" },
+    "response": {
+      "code": 0,
+      "message": "ok",
+      "data": {
+        "apiData": [
+          {
+            "key": "default",
+            "title": "Default",
+            "appKey": "default",
+            "menuKey": "default",
+            "children": [
+              {
+                "name": "listUsers",
+                "title": "List users",
+                "menuKey": "users%40listUsers",
+                "method": "GET",
+                "url": "/users",
+                "appKey": "default",
+                "desc": "List users",
+                "header": [],
+                "query": [
+                  {
+                    "name": "page",
+                    "type": "int",
+                    "desc": "page number",
+                    "require": false,
+                    "default": "1"
+                  }
+                ],
+                "routeParam": [],
+                "param": [],
+                "responseSuccess": [
+                  { "name": "id", "type": "int", "desc": "user id", "require": true }
+                ],
+                "responseError": [],
+                "responseStatus": [{ "name": "200", "desc": "OK" }],
+                "protocol": {
+                  "name": "http",
+                  "label": "HTTP",
+                  "transport": "http",
+                  "http": true,
+                  "debuggable": true
+                },
+                "channel": { "address": "/users", "action": "GET" },
+                "definitions": [],
+                "validation": { "ok": true, "errors": [], "warnings": [] }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "export-swagger",
+    "request": { "key": "share-1" },
+    "response": {
+      "code": 0,
+      "message": "ok",
+      "data": {
+        "openapi": "3.0.0",
+        "info": { "title": "Demo API", "version": "1.0.0" },
+        "paths": {}
+      }
+    }
+  }
+]

@@ -1,0 +1,96 @@
+[
+  {
+    "name": "php-default",
+    "request": { "appKey": "default" },
+    "response": {
+      "code": 0,
+      "message": "ok",
+      "data": {
+        "title": "Demo API",
+        "desc": "UIC-1 fixture",
+        "apps": [
+          {
+            "key": "default",
+            "title": "Default",
+            "path": "default",
+            "host": "https://api.example.com",
+            "hasPassword": true,
+            "groups": [],
+            "params": {
+              "header": [
+                {
+                  "name": "X-Trace",
+                  "type": "string",
+                  "desc": "trace id",
+                  "require": false,
+                  "default": ""
+                }
+              ],
+              "query": [],
+              "body": []
+            },
+            "responses": { "success": [], "error": [] }
+          }
+        ],
+        "cache": { "enable": true },
+        "params": {
+          "header": [],
+          "query": [],
+          "body": []
+        },
+        "responses": { "success": [], "error": [] },
+        "generator": [
+          {
+            "name": "model",
+            "title": "Model",
+            "files": [
+              {
+                "name": "User",
+                "path": "src/User.ts",
+                "namespace": "app",
+                "template": "export interface {{name}} {}\n"
+              }
+            ],
+            "form": { "items": [] },
+            "table": { "field_types": {}, "items": [] }
+          }
+        ],
+        "code_template": [
+          {
+            "title": "API client",
+            "template": "api.ts",
+            "select_mode": "api",
+            "multiple": true,
+            "language": "typescript",
+            "tips": "",
+            "limit": 100,
+            "form": { "items": [] }
+          }
+        ],
+        "share": { "enable": true },
+        "export_config": { "enable": true },
+        "capabilities": {
+          "contract": "1.0",
+          "backend": "php",
+          "version": "1.1.0",
+          "features": {
+            "menus": true,
+            "detail": true,
+            "docs": true,
+            "protocolDefinitions": true,
+            "debug": {
+              "browser": ["http", "websocket", "sse"],
+              "relay": ["raw", "http", "mqtt", "stomp", "coap", "modbus", "iso8583", "rtsp", "sip", "grpc", "hessian", "hls"],
+              "modes": ["browser-http", "browser-websocket", "browser-sse", "relay-unary", "relay-stream"]
+            },
+            "share": { "link": true, "records": true, "actions": true },
+            "cache": { "manage": true, "mode": "server" },
+            "generator": { "forms": true, "templates": true, "sideEffects": false },
+            "exports": ["md", "pdf", "openapi", "postman", "asyncapi", "typescript"],
+            "auth": { "global": true, "app": true, "shareToken": true }
+          }
+        }
+      }
+    }
+  }
+]
