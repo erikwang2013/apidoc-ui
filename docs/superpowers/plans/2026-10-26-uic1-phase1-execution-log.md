@@ -40,6 +40,32 @@
 | Rust `cargo test --workspace` | exit 0; 131 tests passed, 0 failed |
 | E2E `scripts/e2e-uic1.sh` | PASS: PHP 7/7 probes, Go pass, Rust 3/3; server PID/port cleanup verified |
 
+## Post-review security fixes
+
+An independent review found 2 Critical and 5 Important gaps that the green tests did not cover. They were fixed and re-verified:
+
+| Finding | Fix | Commit |
+|---|---|---|
+| C1 PHP share token minted from plaintext | mint from the stored md5 digest; add token-format test | PHP `9054c03` |
+| C2 Rust native `/apidoc/debug` accepted app tokens | `Core::guard_global` used by native debug/stream | Rust `2a5b357` |
+| I1 Rust UIC debug not bound to endpoint app | resolve endpoint first; guard/session use endpoint app key | Rust `2a5b357` |
+| I2 Rust relay target client-controlled | target only from `protocol_opts["target"]` / `ep.url` | Rust `2a5b357` |
+| I3 Go app-password-only bootstrap deadlock | public config bootstrap; protected app data still token-bound | Go `1416d6d` + `c61600e` |
+| I4 Go empty appKey wildcard | require appKey for menus/docs; app tokens cannot cross apps | Go `1416d6d` |
+| I5 Rust per-app public host missing | `APIDOC_PUBLIC_HOSTS` JSON map + `APIDOC_PUBLIC_HOST` fallback | Rust `2a5b357` |
+| M2 Go/Rust shareKey ignored | explicit HTTP 501 envelope | Go `1416d6d`, Rust `2a5b357` |
+| M3 Rust capability/detail relay mismatch | `executor_compiled(kind)` gates `debuggable`/relay list | Rust `2a5b357` |
+
+Verification after fixes:
+- E2E rerun: PHP 7/7, Go pass, Rust 3/3, `E2E: PASS`.
+- Rust: `uic1_routes` 5/5, `uic1_debug_scope` 1/1, lib 36/36, all-targets 180 passed, workspace exit 0.
+- PHP: `ui_contract` 16 PASS + existing 26/169/55/260.
+- Go: `go test -count=1 ./server/uiapi ./server ./auth` pass.
+- Scoped re-review: ALL ADDRESSED 9/9, no new Critical/Important in touched paths.
+- Residual R1 (client `fields` could override dubbo `target`/rtsp `url`) fixed in Rust `8b90377`; lib tests 37/37, route/debug-scope tests 5/5 + 1/1.
+
+Deferred (recorded, Phase 2): M1 stream session limits/rate caps/reaper; M4 PHP generator capability wording; M5 E2E breadth; M6 additional cross-cutting tests. Rust per-app host uses the env map instead of `AppConfig.public_host` to avoid breaking 52 public struct literals.
+
 ## Host load note
 
 The host was at load average 60-88 from other sessions during the first verification pass. Go linking and Rust dependency compilation repeatedly stalled at <1% CPU. A later idle window let the UI build, Rust tests and E2E complete. The E2E harness defaults to PHP port 18091 because 18081 is occupied by another session's server.
