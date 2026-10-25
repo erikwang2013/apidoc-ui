@@ -237,7 +237,7 @@
         if (!data.protocol) {
           nextTabs = nextTabs.filter((p) => p != 'protocol')
         }
-        if (data.notDebug) {
+        if (data.notDebug || (data.protocol && data.protocol.debuggable === false)) {
           nextTabs = nextTabs.filter((p) => p != 'debug')
         }
         state.tabs = nextTabs
