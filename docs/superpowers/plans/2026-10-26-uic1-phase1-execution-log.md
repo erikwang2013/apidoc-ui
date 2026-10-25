@@ -29,14 +29,14 @@
 | `node contract/check.mjs` | pass, 9 fixture files |
 | UI `npm test` | 27 tests pass |
 | UI `vue-tsc --noEmit` | exit 0 |
-| UI `npm run build` | pending at log creation (host load > 80) |
+| UI `npm run build` | pending at log creation (vite transform stalled by host I/O) |
 | PHP `tests/ui_contract.php` | pass |
 | PHP `smoke/protocol/protocol_adapters/debug` | 26/169/55/260 pass |
 | Go `go build ./server/uiapi ./server` | exit 0 |
 | Go `go test ./server/uiapi` | pass |
-| Rust `rustfmt --check` on new files | parse/format only; cargo check pending |
-| Rust `cargo check --features axum` | pending at log creation (dependency compile starved by host load) |
-| Rust `uic1_routes` test | pending |
+| Rust `cargo check --features axum` | exit 0 |
+| Rust `cargo check --features axum,debug-http,debug-session` | exit 0 |
+| Rust `uic1_routes` test | 2/3 pass; WS menu URL assertion fixed, rerun pending |
 | E2E three-backend script | not run yet |
 
 ## Host load note
@@ -45,7 +45,7 @@ The host was at load average 60-88 from other sessions during verification. Go l
 
 ## Follow-ups
 
-1. Rerun UI `npm run build`, Rust `cargo check --features axum`, Rust `cargo test -p apidoc-rust --test uic1_routes --features axum`, and `cargo test --workspace`.
+1. Rerun UI `npm run build`, Rust `cargo test -p apidoc-rust --test uic1_routes --features axum`, and `cargo test --workspace`.
 2. Add the E2E harness (`scripts/e2e-uic1.sh` + PHP demo router) and run it on an idle host.
 3. Phase 2: share CRUD, cache management, generator, docs/export adapters, Rust share-scoped relay, Go/Rust `exportAllData`.
 4. Phase 3/4 remain the multi-month executor and definition-parser work.
