@@ -75,5 +75,6 @@
 
   <text x="104" y="482" font-family="Noto Sans CJK SC, sans-serif" font-size="28" fill="#8B86AD">在线调试 · Mock 数据 · Json/TypeScript 生成 · 接口分享</text>
 
+  <text x="104" y="528" font-family="Noto Sans CJK SC, sans-serif" font-size="26" fill="#6C5CE7">协议调试面板 · 协议定义校验 · 多语言</text>
   <text x="104" y="576" font-family="Source Han Mono, Noto Sans Mono CJK SC, monospace" font-size="24" fill="#A5A0C4">github.com/erikwang2013/apidoc-ui</text>
 </svg>

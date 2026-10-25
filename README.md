@@ -9,7 +9,7 @@
 Apidoc是一套通过解析 PHP/Rust/Go 注解自动生成 API 接口文档的解决方案：
 
 - 服务端为 PHP/Rust/Go，接口代码中写几句注解即可自动产出文档数据；
-- 本项目（ApiDoc UI）即该方案的**前端界面**：负责拉取接口配置与文档数据，以应用 / 版本 / 分组的形式展示接口文档，并提供在线调试、接口分享、Swagger 导出、缓存管理等一系列开箱功能。
+- 本项目（ApiDoc UI）即该方案的**前端界面**：负责拉取接口配置与文档数据，以应用 / 版本 / 分组的形式展示接口文档，并提供在线调试、任意协议调试面板、接口分享、Swagger 导出、缓存管理等一系列开箱功能。
 
 项目来源于 [HGthecode/apidoc-php](https://github.com/HGthecode/apidoc-php) 生态，原作者为 HG-CODE，本仓库为独立维护的 UI 前端仓库。
 
@@ -23,8 +23,9 @@ Apidoc是一套通过解析 PHP/Rust/Go 注解自动生成 API 接口文档的�
 ## 功能特性
 
 - 应用 / 版本 / 分组结构展示接口与文档，支持全部展开收起
-- 接口详情多视图：字段表格、Json、TypeScript、在线调试
+- 接口详情多视图：字段表格、Json、TypeScript、协议定义、在线调试
 - 在线调试：请求前 / 响应后事件、全局参数（Header / Query / Body）、文件上传、Mock 规则扩展
+- 任意协议面板：HTTP/WebSocket/SSE 浏览器直连，MQTT、STOMP、gRPC、TCP/UDP 等由后端中继；展示协议定义与校验结果
 - 接口分享、Swagger JSON 导出、缓存管理（生成 / 清除）
 - 多语言、多 Host 切换，菜单自定义宽度，访问密码授权
 - 内置 md5、setToken 等调试事件扩展点，可自行注册
@@ -91,7 +92,7 @@ window.apidocFeConfig = {
 | `CACHE.PREFIX`           | 本地缓存键前缀                                  |
 | `MENU.WIDTH` / `SHOWURL` | 菜单宽度 / 是否显示接口 URL                     |
 | `METHOD_COLOR`           | GET / POST / PUT / DELETE 等请求类型颜色        |
-| `API_DETAIL_TABS`        | 接口详情页视图顺序（table / json / ts / debug） |
+| `API_DETAIL_TABS`        | 接口详情页视图顺序（table / json / ts / protocol / debug） |
 | `DEBUG_EVENTS`           | 调试事件扩展（内置 md5、setToken 示例）         |
 | `LANG`                   | 界面文案，可增补语言包                          |
 
