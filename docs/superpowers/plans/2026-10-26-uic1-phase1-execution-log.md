@@ -29,23 +29,23 @@
 | `node contract/check.mjs` | pass, 9 fixture files |
 | UI `npm test` | 27 tests pass |
 | UI `vue-tsc --noEmit` | exit 0 |
-| UI `npm run build` | pending; vite transform stalled on host I/O and was stopped before completion |
+| UI `npm run build` | exit 0; 3968 modules, 2m30s; generated `types/components.d.ts` reverted |
 | PHP `tests/ui_contract.php` | pass |
 | PHP `smoke/protocol/protocol_adapters/debug` | 26/169/55/260 pass |
 | Go `go build ./server/uiapi ./server` | exit 0 |
 | Go `go test ./server/uiapi` | pass |
 | Rust `cargo check --features axum` | exit 0 |
 | Rust `cargo check --features axum,debug-http,debug-session` | exit 0 |
-| Rust `uic1_routes` test | first run 2/3; WS menu URL assertion fixed. Rerun blocked on cargo package-cache lock and was stopped |
-| E2E three-backend script | not run yet |
+| Rust `uic1_routes` test | 3/3 passed after the WS menu URL fix |
+| Rust `cargo test --workspace` | exit 0; 131 tests passed, 0 failed |
+| E2E `scripts/e2e-uic1.sh` | PASS: PHP 7/7 probes, Go pass, Rust 3/3; server PID/port cleanup verified |
 
 ## Host load note
 
-The host was at load average 60-88 from other sessions during verification. Go linking and Rust dependency compilation repeatedly stalled at <1% CPU. The pending checks must be rerun before calling Phase 1 complete; no success is claimed for them.
+The host was at load average 60-88 from other sessions during the first verification pass. Go linking and Rust dependency compilation repeatedly stalled at <1% CPU. A later idle window let the UI build, Rust tests and E2E complete. The E2E harness defaults to PHP port 18091 because 18081 is occupied by another session's server.
 
 ## Follow-ups
 
-1. Rerun UI `npm run build`, Rust `cargo test -p apidoc-rust --test uic1_routes --features axum`, and `cargo test --workspace`.
-2. Add the E2E harness (`scripts/e2e-uic1.sh` + PHP demo router) and run it on an idle host.
-3. Phase 2: share CRUD, cache management, generator, docs/export adapters, Rust share-scoped relay, Go/Rust `exportAllData`.
-4. Phase 3/4 remain the multi-month executor and definition-parser work.
+1. Phase 2: share CRUD, cache management, generator, docs/export adapters, Rust share-scoped relay, Go/Rust `exportAllData`.
+2. Phase 3/4 remain the multi-month executor and definition-parser work.
+3. Keep `scripts/e2e-uic1.sh` in CI with the `axum` feature matrix; default-feature `cargo test --workspace` does not exercise UIC-1 routes.
