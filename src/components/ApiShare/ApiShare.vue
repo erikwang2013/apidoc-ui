@@ -21,7 +21,11 @@
                 <h4 class="mb-sm">{{ item.name }}</h4>
                 <div class="api-share-item-desc">
                   <span>{{ t(`apiShare.type.label`) }}：{{ t(`apiShare.type.${item.type}`) }}</span>
-                  <span>{{ t(`apiShare.time.label`) }}：{{ item.create_at }}</span>
+                  <span
+                    >{{ t(`apiShare.time.label`) }}：{{
+                      item.create_at || item.create_time || ''
+                    }}</span
+                  >
                 </div>
               </div>
               <div class="api-share-item-actions">

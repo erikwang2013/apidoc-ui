@@ -1,4 +1,4 @@
-import { FeConfig } from '/@/store/modules/app/interface/FeConfig'
+import { FeConfig } from '/@/store/modules/app/types'
 
 declare type ObjectType<T> = {
   [key: string]: T
