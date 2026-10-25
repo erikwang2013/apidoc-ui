@@ -68,6 +68,8 @@ export interface ApiDetailResult extends ApiMenuItem {
   protocol?: ApiProtocolInfo
   channel?: ApiChannelInfo
   debug?: ApiDebugInfo
+  definitions?: ApiDefinitionInfo[]
+  validation?: ApiValidationInfo
 }
 
 export interface ApiProtocolInfo {
@@ -113,6 +115,37 @@ export interface ApiDebugResult {
   encoding?: 'text' | 'json' | 'hex' | 'base64'
   meta?: Record<string, unknown>
   error?: string
+}
+
+export interface ApiValidationError {
+  path?: string
+  line?: number
+  column?: number
+  severity: 'error' | 'warning'
+  message: string
+}
+
+export interface ApiValidationInfo {
+  ok: boolean
+  errors: ApiValidationError[]
+  warnings: ApiValidationError[]
+}
+
+export interface ApiMessageInfo {
+  name: string
+  direction: 'request' | 'response' | 'event' | 'notification'
+  fields: ApiDetailParamItem[]
+  sample?: string
+  sampleValidation?: ApiValidationInfo
+}
+
+export interface ApiDefinitionInfo {
+  format: string
+  source: string
+  operation?: string
+  meta?: Record<string, unknown>
+  messages: ApiMessageInfo[]
+  validation: ApiValidationInfo
 }
 
 export interface ResponseStatusItem {

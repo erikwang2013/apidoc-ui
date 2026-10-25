@@ -17,7 +17,16 @@
           </template>
           <span v-if="appStore.device != DeviceEnum.MOBILE">{{ t(`apiPage.reload.button`) }}</span>
         </a-button>
-        <h1>{{ state.detail.title }}</h1>
+        <div class="api-title-row">
+          <h1>{{ state.detail.title }}</h1>
+          <protocol-badge v-if="state.detail.protocol" :protocol="state.detail.protocol" />
+          <span
+            v-if="state.detail.protocol && !state.detail.protocol.debuggable"
+            class="protocol-debug-reason"
+          >
+            {{ state.detail.protocol.debugReason || t('apiPage.protocol.debugDisabled') }}
+          </span>
+        </div>
         <text-grid labelWidth="auto" class="mb-sm">
           <text-item
             v-if="state.detail.author"
@@ -31,7 +40,7 @@
             <a-tag v-else v-for="(item, index) in state.detail.tag" :key="index">{{ item }}</a-tag>
           </text-item>
         </text-grid>
-        <div class="api-url">
+        <div v-if="!state.detail.protocol || state.detail.protocol.http" class="api-url">
           <div
             v-if="state.detail.method && typeof state.detail.method == 'string'"
             :class="['api-url-method', state.currentMethod]"
@@ -59,6 +68,17 @@
             <CopyOutlined />
           </div>
         </div>
+        <div v-else class="api-url">
+          <div :class="['api-url-method', 'protocol-action']">
+            {{ state.detail.channel?.action || state.detail.protocol?.mode || 'CALL' }}
+          </div>
+          <div class="api-url-input">
+            <input :value="state.detail.channel?.address || ''" readonly />
+          </div>
+          <div class="api-url-copy" @click="onCopyChannel">
+            <CopyOutlined />
+          </div>
+        </div>
         <div class="api-tabs">
           <a-tabs v-model:activeKey="state.activeTab">
             <a-tab-pane v-for="key in state.tabs" :key="key">
@@ -67,6 +87,7 @@
                   <book-outlined v-if="key == 'table'" />
                   <i v-if="key == 'json'" class="iconfont icon-json"></i>
                   <i v-if="key == 'ts'" class="iconfont icon-typescript-def"></i>
+                  <api-outlined v-if="key == 'protocol'" />
                   <bug-outlined v-if="key == 'debug'" />
 
                   {{ t(`apiPage.tabs.${key}`) }}
@@ -75,6 +96,7 @@
               <table-tab v-if="key == 'table'" :detail="state.detail" />
               <json-tab v-else-if="key == 'json'" :detail="state.detail" />
               <ts-tab v-else-if="key == 'ts'" :detail="state.detail" />
+              <protocol-tab v-else-if="key == 'protocol'" :detail="state.detail" />
               <debug-tab
                 v-else-if="key == 'debug'"
                 :detail="state.detail"
@@ -101,7 +123,13 @@
   import { ApiDetailResult } from '/@/api/apidocApi/types'
   import { TextGrid, TextItem } from '/@/components/TextGrid'
   import { useI18n } from '/@/hooks/useI18n'
-  import { CopyOutlined, BookOutlined, BugOutlined, RedoOutlined } from '@ant-design/icons-vue'
+  import {
+    CopyOutlined,
+    BookOutlined,
+    BugOutlined,
+    RedoOutlined,
+    ApiOutlined,
+  } from '@ant-design/icons-vue'
   import { copyTextToClipboard, handleTableDataRowKey } from '/@/utils/helper/index'
   import { message } from 'ant-design-vue'
   import TableTab from './tableTab/Index.vue'
@@ -112,6 +140,8 @@
   import JsonTab from './JsonTab/Index.vue'
   import TsTab from './TsTab/Index.vue'
   import DebugTab from './DebugTab/Index.vue'
+  import ProtocolTab from './ProtocolTab/Index.vue'
+  import ProtocolBadge from '/@/components/ProtocolBadge'
   import { IResponse } from '/@/utils/http/axios/type'
   import { DeviceEnum } from '/@/enums/appEnum'
   const route = useRoute()
@@ -171,6 +201,11 @@
     message.success(t('common.copySuccess'))
   }
 
+  const onCopyChannel = () => {
+    copyTextToClipboard(state.detail.channel?.address || '')
+    message.success(t('common.copySuccess'))
+  }
+
   const onMethodChange = (method: string) => {
     state.currentMethod = method
   }
@@ -198,11 +233,14 @@
           data.responseSuccess = handleTableDataRowKey(data.responseSuccess)
         }
         state.detail = data
-        if (state.detail.notDebug) {
-          state.tabs = tabs.filter((p) => p != 'debug')
-        } else {
-          state.tabs = tabs
+        let nextTabs = tabs.includes('protocol') ? [...tabs] : [...tabs, 'protocol']
+        if (!data.protocol) {
+          nextTabs = nextTabs.filter((p) => p != 'protocol')
         }
+        if (data.notDebug) {
+          nextTabs = nextTabs.filter((p) => p != 'debug')
+        }
+        state.tabs = nextTabs
         state[loadField] = false
         const method = state.detail.method
         if (method && typeof method === 'string') {
@@ -235,9 +273,20 @@
     max-width: 1200px;
     margin: 0 auto;
     position: relative;
+    .api-title-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding-right: 36px;
+    }
+    .protocol-debug-reason {
+      color: #999;
+      font-size: 12px;
+    }
     h1 {
       margin-bottom: 0px;
-      padding-right: 36px;
+      padding-right: 0;
     }
     .api-url {
       width: 100%;

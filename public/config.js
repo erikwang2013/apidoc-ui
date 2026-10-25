@@ -41,7 +41,7 @@ window.apidocFeConfig = {
     PATCH: "#802feb",
   },
   // 接口详情页的tab顺序
-  API_DETAIL_TABS:["table", "json", "ts", "debug"],
+  API_DETAIL_TABS:["table", "json", "ts", "protocol", "debug"],
   // 接口详情表格属性
   API_TABLE_PROPS:{
   },
@@ -154,6 +154,7 @@ window.apidocFeConfig = {
         "apiPage.tabs.table": "文档",
         "apiPage.tabs.json": "Json",
         "apiPage.tabs.ts": "TypeScript",
+        "apiPage.tabs.protocol": "协议",
         "apiPage.tabs.debug": "调试",
         "apiPage.header.title": "请求头Header",
         "apiPage.query.title": "请求参数Query",
@@ -190,6 +191,19 @@ window.apidocFeConfig = {
         "apiPage.debug.protocolDuration": "耗时",
         "apiPage.debug.protocolBytes": "字节",
         "apiPage.debug.protocolEncoding": "编码",
+
+        "apiPage.protocol.definition": "定义",
+        "apiPage.protocol.source": "来源",
+        "apiPage.protocol.format": "格式",
+        "apiPage.protocol.operation": "操作",
+        "apiPage.protocol.messages": "消息",
+        "apiPage.protocol.validation": "校验",
+        "apiPage.protocol.request": "请求",
+        "apiPage.protocol.response": "响应",
+        "apiPage.protocol.event": "事件",
+        "apiPage.protocol.notification": "通知",
+        "apiPage.protocol.noDefinitions": "该接口尚未配置定义文件",
+        "apiPage.protocol.debugDisabled": "该协议暂时不支持在线调试",
 
         "apiPage.common.field": "字段名",
         "apiPage.common.value": "字段值",
