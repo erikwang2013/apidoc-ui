@@ -29,14 +29,14 @@
 | `node contract/check.mjs` | pass, 9 fixture files |
 | UI `npm test` | 27 tests pass |
 | UI `vue-tsc --noEmit` | exit 0 |
-| UI `npm run build` | pending at log creation (vite transform stalled by host I/O) |
+| UI `npm run build` | pending; vite transform stalled on host I/O and was stopped before completion |
 | PHP `tests/ui_contract.php` | pass |
 | PHP `smoke/protocol/protocol_adapters/debug` | 26/169/55/260 pass |
 | Go `go build ./server/uiapi ./server` | exit 0 |
 | Go `go test ./server/uiapi` | pass |
 | Rust `cargo check --features axum` | exit 0 |
 | Rust `cargo check --features axum,debug-http,debug-session` | exit 0 |
-| Rust `uic1_routes` test | 2/3 pass; WS menu URL assertion fixed, rerun pending |
+| Rust `uic1_routes` test | first run 2/3; WS menu URL assertion fixed. Rerun blocked on cargo package-cache lock and was stopped |
 | E2E three-backend script | not run yet |
 
 ## Host load note
