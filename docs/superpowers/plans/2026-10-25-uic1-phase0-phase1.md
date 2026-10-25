@@ -253,7 +253,7 @@ git commit -m "test(php): add UIC-1 contract harness"
 - Test: `go test ./server/uiapi`, `cargo test -p apidoc-rust --test uic1_contract`
 
 **Interfaces:**
-- Go reads `../../contract/uic-1/fixtures/*.json` from `server/uiapi`; Rust reads `../../../contract/uic-1/fixtures/*.json` from `crates/apidoc/tests`.
+- Go reads `../../contract/uic-1/fixtures/*.json` from `server/uiapi`; Rust tests run with cwd `crates/apidoc`, so Rust reads `../../contract/uic-1/fixtures/*.json`.
 - Go test builds a `httptest.NewServer(server.Handler(...))`; Rust test uses the existing axum test helpers.
 
 - [ ] **Step 1: Write the Go test skeleton**
@@ -275,7 +275,7 @@ func TestFixturesLoad(t *testing.T) {
 ```rust
 #[test]
 fn fixtures_load() {
-    let raw = std::fs::read_to_string("../../../contract/uic-1/fixtures/menus.json").unwrap();
+    let raw = std::fs::read_to_string("../../contract/uic-1/fixtures/menus.json").unwrap();
     let rows: serde_json::Value = serde_json::from_str(&raw).unwrap();
     assert!(rows.as_array().is_some_and(|a| !a.is_empty()));
 }
