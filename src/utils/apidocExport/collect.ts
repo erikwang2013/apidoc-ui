@@ -33,13 +33,26 @@ export interface DocNode {
 }
 
 export interface CollectDocOptions {
-  /** 应用范围：appStore.appObject 的 key（叶子应用，可能逗号拼接） */
+  /** 应用范围：appStore.appObject 的 key（叶子应用，可能逗号拼接），决定文档页读取范围 */
   appScopes: string[]
   /** 分享页查看者：批量导出走 shareKey + 分享 token；文档读取透传 shareKey */
   shareKey?: string
-  /** 属主分享记录导出：批量接口走 key（全局 token），文档读取仍按 shareKey 过滤 */
+  /** 属主分享记录导出：批量接口走 key（全局 token），文档按 appScopes 逐 app 读取 */
   key?: string
   lang?: string
+}
+
+/**
+ * 属主分享导出的 app 范围：优先分享的 appKeys；api 类型且无 appKeys 时
+ * 没有可安全导出的文档范围（返回空，跳过文档），其余空 appKeys 回退全部 app。
+ */
+export function ownerExportAppScopes(
+  share: { type?: string; appKeys?: string[] },
+  allAppKeys: string[],
+): string[] {
+  const appKeys = share.appKeys || []
+  if (appKeys.length) return appKeys
+  return share.type === 'api' ? [] : allAppKeys
 }
 
 /** 单批并发上限：回退路径专用，走慢一点避免触发服务端限流 */
@@ -236,7 +249,7 @@ function baseOf(appKey: string, shareKey: string | undefined, lang: string): Api
 
 /**
  * 收集全部导出内容。
- * 任一请求失败即 reject，message 已可读（由调用方 toast）。
+ * 接口请求失败即 reject（message 可读，由调用方 toast）；文档按 app 容错，失败的 app 跳过。
  */
 export async function collectDoc(options: CollectDocOptions): Promise<DocNode[]> {
   const appStore = useAppOutsideStore()
@@ -279,8 +292,13 @@ export async function collectDoc(options: CollectDocOptions): Promise<DocNode[]>
   }
 
   // 文档页：只有查看者导出带 shareKey（分享 token）；属主导出走 per-app 全局凭证。
+  // 单个 app 读取失败（如受密码保护且无 app token）只跳过它的文档，不影响 API 导出。
   for (const appKey of options.appScopes) {
-    nodes.push(...(await collectDocs(baseOf(appKey, options.shareKey, lang))))
+    try {
+      nodes.push(...(await collectDocs(baseOf(appKey, options.shareKey, lang))))
+    } catch (error) {
+      console.warn(`[apidoc export] skip docs for app ${appKey}: ${errMessage(error)}`)
+    }
   }
 
   // 按 app 归并分组：导出渲染按 appTitle 分节，接口与文档需保持同 app 相邻

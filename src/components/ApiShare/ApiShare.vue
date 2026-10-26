@@ -112,7 +112,7 @@
   import EditShareModal from './EditShare.vue'
   import { message } from 'ant-design-vue'
   import { copyTextToClipboard, downloadFile } from '/@/utils/helper/index'
-  import { collectDoc, errMessage } from '/@/utils/apidocExport/collect'
+  import { collectDoc, errMessage, ownerExportAppScopes } from '/@/utils/apidocExport/collect'
   import {
     blobDownload,
     buildMarkdown,
@@ -278,7 +278,7 @@
         }
       }
       const nodes = await collectDoc({
-        appScopes: Object.keys(appStore.appObject),
+        appScopes: ownerExportAppScopes(item, Object.keys(appStore.appObject)),
         key: item.key,
       })
       if (!nodes.length) {
