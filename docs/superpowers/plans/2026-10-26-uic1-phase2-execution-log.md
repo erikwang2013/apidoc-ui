@@ -52,8 +52,11 @@ The independent Phase 2 review found 2 Critical + 5 Important + 1 new Important 
 | M7 public-share login diverged | all backends reject passwordless share login; tokenless reads remain | Go/Rust |
 | M8 test gaps | PHP/Go/Rust/UI regression tests + E2E negative probes | all |
 | M9 PHP share keys time-based | `bin2hex(random_bytes(16))` | PHP `60b8507` |
+| U1 owner share export read docs for every app | derive doc scope from the share's `appKeys` (`api` without appKeys skips docs); per-app doc failure skips that app instead of failing the export; multi-app request-set test | UI `79a2aea` |
 
 Final E2E after all fixes: **PHP 32/32, Go pass, Rust 5/5 + 1/1 + management 1/1, E2E PASS**.
+
+Post-U1 scoped re-review: **U1 ADDRESSED**, no new Critical/Important; UI `npm test` 43 tests (10 files), `vue-tsc`/build exit 0. **Phase 2 is complete** (L3 management parity plus M1/M4/M5/M6/M8 hardening); Phase 3/4/5 remain not started.
 
 ## Accepted deviations
 
@@ -74,9 +77,10 @@ Final E2E after all fixes: **PHP 32/32, Go pass, Rust 5/5 + 1/1 + management 1/1
 - Phase 5: packaging/static UI embedding.
 - Minor: Rust UIC stream TTL is request-driven (no background reaper); abandoned sessions are closed on the next debug request or drop; Rust share store serializes writers only within one process.
 - `getAllApiMenus` (legacy read route) still accepts app tokens and returns every app's menus; intentional legacy read behavior, but deployments should treat it as app-wide data.
+- Owner export doc skips are logged to the console only (no in-UI notice). Raw-API Rust `app` shares with empty `appKeys` are outside the UI/PHP/Go creation gates; the owner doc export falls back to all apps there.
+- `app`-share with empty `appKeys`: PHP legacy semantics mean "all apps", Rust strict semantics mean "no apps"; only reachable for records created outside the UI/PHP/Go creation gates.
 
 ## Follow-ups
 
-1. Independent Phase 2 review + one fix wave.
-2. Merge the four `feat/uic1-phase0` branches after review.
-3. Schedule Phase 2b/3/4 as separate programs; do not claim them as done.
+1. Merge the four `feat/uic1-phase0` branches after final closeout.
+2. Schedule Phase 2b/3/4 as separate programs; do not claim them as done.
