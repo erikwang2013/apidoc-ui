@@ -349,10 +349,35 @@ rust_e2e() {
     --test uic1_management --features axum
 }
 
+# Phase 5.3: the same packaged Vue build must be served by Go and Rust.
+static_ui_e2e() {
+  local pkg="${UIC1_UI_PACKAGE:-$SCRIPT_DIR/../dist/uic1-ui}"
+  if [[ ! -f "$pkg/manifest.json" || ! -f "$pkg/index.html" ]]; then
+    echo "FAIL static-ui: package missing at $pkg (run npm run package:ui)"
+    return 1
+  fi
+  local name declared actual
+  name="$(jq -r '.name // empty' "$pkg/manifest.json")"
+  declared="$(jq -r '.sha256 // empty' "$pkg/manifest.json")"
+  actual="$(cd "$pkg" && find . -type f ! -path ./manifest.json -print0 \
+    | LC_ALL=C sort -z | xargs -0 -r sha256sum | sha256sum | cut -d' ' -f1)"
+  if [[ "$name" != "uic1-ui" || -z "$declared" || "$declared" != "$actual" ]]; then
+    echo "FAIL static-ui: manifest name/sha mismatch (name=$name declared=$declared actual=$actual)"
+    return 1
+  fi
+  echo "static-ui: package $pkg sha256 $actual"
+  (cd "$GO_DIR" && UIC1_UI_PACKAGE="$pkg" timeout "$GO_TIMEOUT" \
+    go test -count=1 . -run '^TestPackagedUIServed$') || return 1
+  (cd "$RUST_DIR" && UIC1_UI_PACKAGE="$pkg" timeout "$RUST_TIMEOUT" \
+    cargo test -p apidoc-rust --features axum --test static_ui \
+    packaged_ui_is_served_when_configured) || return 1
+}
+
 overall=1
 if php_e2e; then echo "RESULT php: PASS"; else echo "RESULT php: FAIL"; overall=0; fi
 if go_e2e; then echo "RESULT go: PASS"; else echo "RESULT go: FAIL"; overall=0; fi
 if rust_e2e; then echo "RESULT rust: PASS"; else echo "RESULT rust: FAIL"; overall=0; fi
+if static_ui_e2e; then echo "RESULT static-ui: PASS"; else echo "RESULT static-ui: FAIL"; overall=0; fi
 
 if [[ "$overall" == 1 ]]; then
   echo "E2E: PASS"
