@@ -56,7 +56,8 @@ is_empty_dir() {
 
 is_uic1_package() {
   [[ -f "$1/manifest.json" ]] &&
-    grep -q '"name"[[:space:]]*:[[:space:]]*"uic1-ui"' "$1/manifest.json"
+    node -e 'process.exit(require(process.argv[1]).name === "uic1-ui" ? 0 : 1)' \
+      "$1/manifest.json" 2>/dev/null
 }
 
 destinations=()
@@ -100,8 +101,12 @@ done
 # empty directory or a previous uic1-ui package: a typo must not replace an
 # unrelated site's index.html.
 for dest in "${destinations[@]}"; do
-  if [[ -z "$dest" || ! -d "$dest" ]]; then
-    echo "package-ui: destination is empty or not an existing directory: '$dest'" >&2
+  if [[ -z "$dest" ]]; then
+    echo "package-ui: destination is empty" >&2
+    exit 1
+  fi
+  if [[ ! -d "$dest" ]]; then
+    echo "package-ui: destination is not an existing directory: '$dest' (create it first)" >&2
     exit 1
   fi
   if ! is_empty_dir "$dest" && ! is_uic1_package "$dest"; then

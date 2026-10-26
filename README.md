@@ -68,9 +68,9 @@ SKIP_BUILD=1 npm run package:ui           # 复用 apidoc/ 现有产物
 npm run check:package-ui                  # 自检：重复打包哈希一致且与复算一致
 ```
 
-目标目录必须为空或包含上一次 `uic1-ui` 包（`manifest.json`），脚本不会覆盖其他非空目录；复制只覆盖、不删除旧文件，升级前先清空旧目录。脚本要求 bash ≥ 4.4 与 GNU coreutils（`sha256sum`、`sort -z`），macOS 需安装 GNU coreutils。
+目标目录必须已存在且为空，或包含上一次 `uic1-ui` 包（`manifest.json`）；脚本不会创建目录，也不会覆盖其他非空目录。复制只覆盖、不删除旧文件，升级前先清空旧目录。脚本要求 bash ≥ 4.4 与 GNU coreutils（`sha256sum`、`sort -z`），macOS 需安装 GNU coreutils。
 
-`dist/uic1-ui/manifest.json` 记录 `version`、`builtAt`、`gitCommit` 与内容 `sha256`；`builtAt` 是打包时间，`SKIP_BUILD=1` 时 `gitCommit` 不保证是产物构建提交（脚本会校验构建版本与 `package.json` 一致）。同一份包部署到三端后 `sha256` 应保持一致。升级步骤、后端配置（`BACKEND`、Rust `ui`/`ui_path`、Go `UIPath`（待 5G.1））、版本矩阵与回滚见 [UIC-1 升级指南](docs/superpowers/guides/2026-10-26-uic1-upgrade.md)。
+`dist/uic1-ui/manifest.json` 记录 `version`、`builtAt`、`gitCommit` 与内容 `sha256`；`builtAt` 是打包时间，`SKIP_BUILD=1` 时 `gitCommit` 不保证是产物构建提交（脚本会校验构建版本与 `package.json` 一致）。同一份包部署到三端后 `sha256` 应保持一致。升级步骤、后端配置（`BACKEND`、Rust `ui`/`ui_path`、Go `UIPath`）、版本矩阵与回滚见 [UIC-1 升级指南](docs/superpowers/guides/2026-10-26-uic1-upgrade.md)。
 
 ## 配置说明
 

@@ -4,7 +4,7 @@
 
 - 旧版 PHP 专用 UI → UIC-1（自动探测，legacy PHP 继续可用）
 - Rust 原生 UI → Vue UI（`ui: UiMode::Vue` / `ui_path`）
-- Go 外部 UI → 内置静态 UI（`UIPath`；Phase 5G.1 待落地，见 §5）
+- Go 外部 UI → 内置静态 UI（`Config.UIPath`，已随 5G.1 落地）
 
 设计背景见 `docs/superpowers/specs/2026-10-25-multi-backend-parity-design.md` 第 5.10 节，
 发布脚本见 `scripts/package-ui.sh`，后端实现见 UIC-1 Phase 5（5G.1 / 5R.1 / 5U.1）。
@@ -32,8 +32,9 @@ npm run check:package-ui                 # 校验重复打包哈希与复算哈�
 ```
 
 脚本要求 **bash ≥ 4.4** 与 **GNU coreutils**（`sha256sum`、`sort -z`、`xargs -0`）；
-macOS 需安装 GNU coreutils。目标目录必须 **为空**，或包含上一次 `uic1-ui` 包的
-`manifest.json`（`name` 为 `uic1-ui`）；脚本拒绝覆盖任何其他非空目录。
+macOS 需安装 GNU coreutils。目标目录必须 **已存在且为空**，或包含上一次 `uic1-ui`
+包的 `manifest.json`（`name` 为 `uic1-ui`）；脚本不会创建目录，也拒绝覆盖任何其他
+非空目录。
 
 产物目录 `dist/uic1-ui/` 的内容（包括但不限于）：
 
@@ -75,7 +76,7 @@ cd dist/uic1-ui && find . -type f ! -path ./manifest.json -print0 \
 | 后端 | 放置位置                                            | 访问路径                          |
 | ---- | --------------------------------------------------- | --------------------------------- |
 | PHP  | 站点现有的 UI 目录（通常是 `public/apidoc/`）        | `{站点}/apidoc/`                  |
-| Go   | `Config.UIPath` 指向的目录（Phase 5G.1 待落地）      | `{Prefix}/`（默认 `/apidoc/`）    |
+| Go   | `Config.UIPath` 指向的目录（已存在，含 `index.html`） | `{Prefix}/`（默认 `/apidoc/`）    |
 | Rust | `ui_path` 指向的目录，且 `ui: UiMode::Vue`           | `/apidoc/`                        |
 
 注意：
@@ -164,24 +165,45 @@ Vue 模式行为：
 - `ui_path` 内路径限制、`..`/编码绕过/符号链接逃逸返回 404；缺 `index.html` 启动即报错；
 - 缓存与生成器差异见第 7 节。回滚只需改回 `ui: UiMode::Native`。
 
-## 5. Go 外部 UI → 内置静态 UI（Phase 5G.1 待落地）
+## 5. Go 外部 UI → 内置静态 UI
 
-> **状态：待落地。** 截至 2026-10-26，apidoc-go `feat/uic1-remaining`（`967100e`）
-> 尚未实现 `Config.UIPath` 或 `embed.FS` 内置 UI（5G.1 在并行开发中）。本节是
-> Phase 5 计划接口，**落地前不要据此修改生产配置**；当前 Go 部署继续使用外部 UI，
-> 无需任何改动。
+Go 此前只提供文档 API，由外部 UI 消费。Phase 5（5G.1）新增 `Config.UIPath`：
 
-5G.1 计划行为（以实际发布代码为准）：
+| 配置     | 类型     | 默认             | 说明                                                            |
+| -------- | -------- | ---------------- | --------------------------------------------------------------- |
+| `UIPath` | `string` | `""`（不内置 UI） | 打包产物目录；非空时在 `{Prefix}/` 下同进程提供静态 UI           |
 
-- `Config.UIPath`：字符串目录，含 `index.html`/`config.js`/`assets/`；为空表示不内置，
-  库默认关闭，现有外部 UI 行为不变。
-- 非空时在 `{Prefix}/`、`{Prefix}/config.js`、`{Prefix}/assets/*` 提供静态 UI，
-  未知路径回退 `index.html`（SPA 兜底）。
-- 官方发布包通过 `embed.FS` 默认内置同一份构建；库默认仍关闭。
-- 仍使用外部 UI 的部署：保持 `config.js` 的 `HOSTS`/`API_PREFIX` 指向 Go 服务。
-- 回滚（落地后）：清空 `UIPath` 并重启，回到纯文档 API 模式。
+```go
+s := apidoc.New(apidoc.Config{
+    Prefix: "/apidoc",
+    UIPath: "/srv/myapp/dist/uic1-ui", // npm run package:ui 的 dist/uic1-ui/
+})
+```
 
-5G.1 合并后，本节需按实际字段名、类型、默认值校对，并补充可执行的配置示例。
+升级步骤：
+
+1. 构建并部署打包产物（目标目录必须已存在且为空，或为上一次 `uic1-ui` 包）：
+   `npm run package:ui -- --dest /srv/myapp/dist/uic1-ui`；
+2. 启动时设置 `UIPath`；
+3. 重启后访问 `/apidoc/`，确认首页页脚版本与 `manifest.json` 一致。
+
+行为：
+
+- **库本身不内嵌前端资源（没有 `embed.FS`）**，也没有构建期依赖。发布包需随包分发
+  `dist/uic1-ui/`，并在启动配置中把 `UIPath` 指向它；不能只依赖库默认值。
+- `UIPath` 为空是库默认：仅提供 JSON 文档 API，外部 UI 行为与升级前一致。
+- `{Prefix}`（无尾斜杠）307 到 `{Prefix}/`，保证相对资源路径正确。
+- `{Prefix}/`、`{Prefix}/index.html`、`{Prefix}/config.js`、`{Prefix}/assets/*` 直接
+  返回静态文件，MIME 按扩展名决定；未知的无扩展名路径回退 `index.html`（SPA 兜底），
+  缺失的 `.js`/`.css` 等资源返回 404。
+- `{Prefix}/api/*`、`{Prefix}/ui/v1/*` 优先匹配；未知 API 路径返回 404，不会回退 UI。
+- 文件访问限制在 `UIPath` 内（拒绝 `..` 与越界符号链接），不列目录；`UIPath` 无效或
+  `index.html` 缺失时仅 UI 路由返回 500，文档 API 不受影响。
+- go-zero 适配器只注册固定 API 路由、不转发前缀下的任意路径，因此该适配器下内置 UI
+  不可用；其余适配器均支持。
+- 仍使用外部 UI 的部署：不设置 `UIPath`，保持 `config.js` 的 `HOSTS`/`API_PREFIX`
+  指向 Go 服务。
+- 回滚：清空 `UIPath` 并重启，回到纯文档 API + 外部 UI 模式。
 
 ## 6. 版本与兼容矩阵
 
@@ -189,7 +211,7 @@ Vue 模式行为：
 | ------------------------ | --------------------------------------------------- | ---------------------------------- | ----------------------------- |
 | legacy PHP（未升级）     | 有 `GET {PREFIX}/config`                            | `BACKEND: auto` 或 `php`           | legacy PHP 适配器             |
 | UIC-1 PHP/Go/Rust        | `ui/v1/capabilities`，contract `1.0`                | `BACKEND: auto`                    | UIC-1 适配器                  |
-| Go 内置 UI（待 5G.1）    | 未落地；继续使用外部 UI                             | —                                  | 尚未可用                      |
+| Go 内置 UI               | 含 5G.1 的版本，`Config.UIPath` 非空                | 同源，`HOSTS: []`                  | `/apidoc/` 直接打开           |
 | Rust Vue UI              | 含 5R.1 的版本，`ui: UiMode::Vue` + `ui_path: Some(...)` | 同源，`HOSTS: []`             | `/apidoc/` 直接打开           |
 | Rust 原生 UI（回滚）     | `ui: UiMode::Native`（库默认）                      | 同源                               | 旧原生界面                    |
 
@@ -227,12 +249,11 @@ UI 与后端独立回滚，推荐顺序：先回滚 UI，再回滚后端配置�
 
 1. **只回滚 UI**：保留上一份 `dist/uic1-ui/`（或旧 `apidoc/`），停止复制新文件并整体
    恢复旧目录；后端不需要动。旧 UI + 新后端时，新后端仍保留 legacy 路由（PHP）或
-   可显式降级（Rust `UiMode::Native`；Go 内置 UI 5G.1 落地后清空 `UIPath`）。
+   可显式降级（Rust `UiMode::Native`；Go 清空 `UIPath`）。
 2. **PHP**：把旧的 UI 目录放回原位置；如需强制 legacy 适配器，设 `BACKEND: 'php'`，
    验证后改回 `auto`。
 3. **Rust**：设 `ui: UiMode::Native` 并重启，恢复原生 UI；`ui_path` 可保留。
-4. **Go**：5G.1 落地后可清空 `UIPath` 并重启，恢复纯文档 API + 外部 UI；当前版本
-   尚无该字段，保持外部 UI 即为升级前状态。
+4. **Go**：清空 `UIPath` 并重启，恢复纯文档 API + 外部 UI。
 5. **数据**：本升级不修改文档数据、分享记录或缓存格式；回滚不需要数据迁移。
 
 ## 9. 升级验收
@@ -258,8 +279,8 @@ curl -fsS "$BASE/config.js" | grep -q apidocFeConfig
 ```
 
 三端对照 `manifest.json` 的 `version` 与 `sha256`；同一份包部署到三端时两者必须一致。
-Go 的静态 UI 验收在 5G.1 落地后执行。若页面进入全局错误页，按第 3 节的探测顺序检查
-`ui/v1/capabilities`，而不是只看浏览器控制台。
+若页面进入全局错误页，按第 3 节的探测顺序检查 `ui/v1/capabilities`，而不是只看浏览器
+控制台。
 
 ## 10. 相关文件
 
