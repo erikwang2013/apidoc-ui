@@ -45,7 +45,7 @@
           "share": {
             "link": true,
             "records": true,
-            "actions": true
+            "actions": false
           },
           "cache": {
             "manage": true,
