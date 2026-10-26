@@ -57,6 +57,18 @@ npm run build   # vue-tsc 类型检查 + 构建，产物输出到 apidoc/ 目录
 2. 替换线上旧文件前先清空旧目录：新版 `index.html` 不再引用旧版哈希资源（`assets/*`、`utils/*`），残留无用且易被缓存；
 3. 改完 `config.js` 后强制刷新一次（Ctrl+F5）。`config.js?v=<版本号>` 为缓存戳，来自 package.json 的 version，发布新版即可自动失效旧缓存。
 
+## 打包共享 UI（UIC-1）
+
+PHP / Go / Rust 三端共用同一份构建。发布时使用打包脚本生成带版本清单的包：
+
+```bash
+npm run package:ui                        # 构建并输出 dist/uic1-ui/
+npm run package:ui -- --dest /srv/apidoc  # 额外复制到已存在的目录（可重复）
+SKIP_BUILD=1 npm run package:ui           # 复用 apidoc/ 现有产物
+```
+
+`dist/uic1-ui/manifest.json` 记录 `version`、`builtAt`、`gitCommit` 与内容 `sha256`，同一份包部署到三端后应保持一致。升级步骤、后端配置（`BACKEND`、Rust `ui`/`ui_path`、Go `UIPath`）、版本矩阵与回滚见 [UIC-1 升级指南](docs/superpowers/guides/2026-10-26-uic1-upgrade.md)。
+
 ## 配置说明
 
 ### 后端地址（config.js）
@@ -88,6 +100,7 @@ window.apidocFeConfig = {
 
 | 配置                     | 说明                                            |
 | ------------------------ | ----------------------------------------------- |
+| `BACKEND`                | 后端类型覆盖：`auto` / `php` / `go` / `rust`（默认 `auto`） |
 | `TITLE`                  | 页面标题                                        |
 | `CACHE.PREFIX`           | 本地缓存键前缀                                  |
 | `MENU.WIDTH` / `SHOWURL` | 菜单宽度 / 是否显示接口 URL                     |
