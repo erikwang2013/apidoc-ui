@@ -173,7 +173,11 @@ php_e2e() {
   # --- Phase 2 management ---
 
   check_php "capabilities management" 200 \
-    '.code==0 and .data.features.share.records==true and .data.features.cache.manage==true and .data.features.generator.templates==true and .data.features.auth.shareToken==true' \
+    '.code==0 and .data.features.share.records==true and .data.features.cache.manage==true and .data.features.generator.sideEffects==false and .data.features.auth.shareToken==true' \
+    "$(req GET "$BASE/capabilities")"
+
+  check_php "capabilities Phase 3-5" 200 \
+    '.code==0 and (.data.features.debug.relay | length)>=25 and (.data.features.debug.relay | index("thrift"))!=null and (.data.features.debug.relay | index("kafka"))!=null and (.data.features.debug.relay | index("dnp3"))!=null and (.data.features.debug.relay | index("opcua"))!=null and (.data.features.debug.relay | index("rtmp"))!=null and (.data.features.debug.relay | index("lwm2m"))!=null and .data.features.generator.sideEffects==false and .data.features.protocolDefinitions==true' \
     "$(req GET "$BASE/capabilities")"
 
   local share_name="UIC-1 E2E share" share_key="" share_token="" share_menu_key="" app_token=""
