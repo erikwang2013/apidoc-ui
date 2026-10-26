@@ -24,31 +24,46 @@ BASE="http://$PHP_HOST:$PHP_PORT/apidoc/ui/v1"
 
 TMP_DIR="$(mktemp -d)"
 PHP_PID=""
+PHP_OPEN_PID=""
+STARTED_PID=""
 PHP_OK=1
+# Second fixture server with global auth off (see tests/fixtures/ui_server.php).
+PHP_OPEN_PORT="${UIC1_PHP_OPEN_PORT:-$((PHP_PORT + 1))}"
 
-# Only ever kills the PHP server this script started.
-stop_php() {
-  [[ -n "$PHP_PID" ]] || return 0
-  local pid="$PHP_PID"
-  PHP_PID=""
+stop_php_pid() { # label pid port
+  local label="$1" pid="$2" port="$3"
+  [[ -n "$pid" ]] || return 0
   kill "$pid" 2>/dev/null || true
   wait "$pid" 2>/dev/null || true
-  echo "php: stopped server pid $pid"
+  echo "$label: stopped server pid $pid"
   local i
   for i in $(seq 1 25); do
-    if ! (exec 3<>"/dev/tcp/$PHP_HOST/$PHP_PORT") 2>/dev/null; then
-      echo "php: port $PHP_PORT closed"
+    if ! (exec 3<>"/dev/tcp/$PHP_HOST/$port") 2>/dev/null; then
+      echo "$label: port $port closed"
       return 0
     fi
     sleep 0.2
   done
-  echo "php: WARN port $PHP_PORT still accepting after server stop"
+  echo "$label: WARN port $port still accepting after server stop"
+}
+
+# Only ever kills the PHP servers this script started.
+stop_php() {
+  local pid="$PHP_PID"
+  PHP_PID=""
+  stop_php_pid "php" "$pid" "$PHP_PORT"
+}
+stop_php_open() {
+  local pid="$PHP_OPEN_PID"
+  PHP_OPEN_PID=""
+  stop_php_pid "php-open" "$pid" "$PHP_OPEN_PORT"
 }
 
 cleanup() {
   local status=$?
   trap - EXIT
   stop_php
+  stop_php_open
   rm -rf -- "$TMP_DIR"
   exit "$status"
 }
@@ -73,6 +88,34 @@ check_php() { # name want-http jq-expr http-status
   fi
 }
 
+# Starts tests/fixtures/ui_server.php on a port, waits until ready, and sets
+# STARTED_PID. Refuses a busy port instead of touching another process.
+start_php_server() { # port log [env-assignment]
+  local port="$1" log="$2" env_pair="${3:-}" i
+  if (exec 3<>"/dev/tcp/$PHP_HOST/$port") 2>/dev/null; then
+    echo "FAIL php: $PHP_HOST:$port already in use; refusing to touch another process (set UIC1_PHP_PORT/UIC1_PHP_OPEN_PORT)"
+    return 1
+  fi
+  if [[ -n "$env_pair" ]]; then
+    (cd "$PHP_DIR" && exec env "$env_pair" php -S "$PHP_HOST:$port" tests/fixtures/ui_server.php) \
+      >"$log" 2>&1 &
+  else
+    (cd "$PHP_DIR" && exec php -S "$PHP_HOST:$port" tests/fixtures/ui_server.php) \
+      >"$log" 2>&1 &
+  fi
+  STARTED_PID=$!
+  for i in $(seq 1 100); do
+    if curl -sf --max-time 1 -o /dev/null "http://$PHP_HOST:$port/apidoc/ui/v1/capabilities"; then
+      return 0
+    fi
+    kill -0 "$STARTED_PID" 2>/dev/null || break
+    sleep 0.2
+  done
+  echo "FAIL php: server on $PHP_HOST:$port did not become ready"
+  tail -n 20 "$log"
+  return 1
+}
+
 php_e2e() {
   local server="$PHP_DIR/tests/fixtures/ui_server.php"
   if ! command -v php >/dev/null || ! command -v curl >/dev/null || ! command -v jq >/dev/null; then
@@ -83,29 +126,13 @@ php_e2e() {
     echo "FAIL php: missing $server"
     return 1
   fi
-  if (exec 3<>"/dev/tcp/$PHP_HOST/$PHP_PORT") 2>/dev/null; then
-    echo "FAIL php: $PHP_HOST:$PHP_PORT already in use; refusing to touch another process (set UIC1_PHP_PORT)"
+  if ! start_php_server "$PHP_PORT" "$TMP_DIR/php-server.log"; then
+    stop_php_pid "php" "$STARTED_PID" "$PHP_PORT"
+    STARTED_PID=""
     return 1
   fi
-
-  (cd "$PHP_DIR" && exec php -S "$PHP_HOST:$PHP_PORT" tests/fixtures/ui_server.php) \
-    >"$TMP_DIR/php-server.log" 2>&1 &
-  PHP_PID=$!
-
-  local i ready=0
-  for i in $(seq 1 100); do
-    if curl -sf --max-time 1 -o /dev/null "$BASE/capabilities"; then
-      ready=1
-      break
-    fi
-    kill -0 "$PHP_PID" 2>/dev/null || break
-    sleep 0.2
-  done
-  if [[ "$ready" != 1 ]]; then
-    echo "FAIL php: server did not become ready"
-    tail -n 20 "$TMP_DIR/php-server.log"
-    return 1
-  fi
+  PHP_PID="$STARTED_PID"
+  STARTED_PID=""
 
   check_php "capabilities" 200 \
     '.code==0 and .data.contract=="1.0" and .data.backend=="php" and .data.features.auth.global==true' \
@@ -149,7 +176,7 @@ php_e2e() {
     '.code==0 and .data.features.share.records==true and .data.features.cache.manage==true and .data.features.generator.templates==true and .data.features.auth.shareToken==true' \
     "$(req GET "$BASE/capabilities")"
 
-  local share_name="UIC-1 E2E share" share_key="" share_token="" share_menu_key=""
+  local share_name="UIC-1 E2E share" share_key="" share_token="" share_menu_key="" app_token=""
   check_php "share add" 200 \
     '.code==0 and .data==true' \
     "$(req POST "$BASE/addApiShare" "$(jq -cn --arg n "$share_name" '{name:$n,type:"app",appKeys:["default"],password:"share-pw"}')" "$token")"
@@ -193,6 +220,54 @@ php_e2e() {
     '.code==0 and (.data.apiData|type=="array") and ([.data.apiData[] | .. | objects | select(.name=="listUsers" and .url=="/users")]|length>=1)' \
     "$(req POST "$BASE/exportAllData" '{"appKey":"default"}' "$token")"
 
+  # Owner export by share key: global token only, filtered to the share's apps.
+  check_php "share owner export" 200 \
+    '.code==0 and ([.data.apiData[] | select(.appKey=="default")] | length)==1 and ([.data.apiData[] | select(.appKey=="secure")] | length)==0 and ([.data.apiData[] | .. | objects | select(.name=="listUsers")] | length)>=1 and (.data|tostring|contains("app-pw")|not)' \
+    "$(req POST "$BASE/exportAllData" "$(jq -cn --arg k "$share_key" '{key:$k}')" "$token")"
+
+  # Share viewer export: share token + shareKey, same app scope.
+  check_php "share viewer export" 200 \
+    '.code==0 and ([.data.apiData[] | select(.appKey=="default")] | length)==1 and ([.data.apiData[] | select(.appKey=="secure")] | length)==0 and (.data|tostring|contains("app-pw")|not)' \
+    "$(req POST "$BASE/exportAllData" "$(jq -cn --arg k "$share_key" '{shareKey:$k,appKey:"default"}')" "$share_token")"
+
+  # An app password token must never pass the global-only management guard.
+  check_php "app login" 200 \
+    '.code==0 and (.data.token|type=="string") and (.data.token|length>0)' \
+    "$(req POST "$BASE/verifyAuth" '{"password":"app-pw","appKey":"secure"}')"
+  app_token="$(jq -r '.data.token // empty' "$TMP_DIR/body")"
+
+  check_php "app token rejected: share add" 401 \
+    '.code==4001' \
+    "$(req POST "$BASE/addApiShare" '{"appKey":"secure","name":"evil","type":"all"}' "$app_token")"
+
+  check_php "app token rejected: share list" 401 \
+    '.code==4001' \
+    "$(req POST "$BASE/getApiShareList" '{"appKey":"secure","pageIndex":1}' "$app_token")"
+
+  check_php "app token rejected: share detail" 401 \
+    '.code==4001' \
+    "$(req POST "$BASE/getApiShareDetail" '{"appKey":"secure","key":"not-a-share"}' "$app_token")"
+
+  check_php "app token rejected: share delete" 401 \
+    '.code==4001' \
+    "$(req POST "$BASE/deleteApiShare" '{"appKey":"secure","key":"not-a-share"}' "$app_token")"
+
+  check_php "app token rejected: cache clear" 401 \
+    '.code==4001' \
+    "$(req POST "$BASE/cache/clear" '{"appKey":"secure"}' "$app_token")"
+
+  check_php "app token rejected: cache warm" 401 \
+    '.code==4001' \
+    "$(req POST "$BASE/cache/warm" '{"appKey":"secure"}' "$app_token")"
+
+  check_php "app token rejected: generator" 401 \
+    '.code==4001' \
+    "$(req POST "$BASE/generator" '{"appKey":"secure","index":0}' "$app_token")"
+
+  check_php "app token rejected: exportAllData key" 401 \
+    '.code==4001' \
+    "$(req POST "$BASE/exportAllData" "$(jq -cn --arg k "$share_key" '{appKey:"secure",key:$k}')" "$app_token")"
+
   check_php "share delete" 200 \
     '.code==0 and .data==true' \
     "$(req POST "$BASE/deleteApiShare" "$(jq -cn --arg k "$share_key" '{key:$k}')" "$token")"
@@ -200,6 +275,24 @@ php_e2e() {
   check_php "share detail after delete" 404 \
     '.code!=0' \
     "$(req POST "$BASE/getApiShareDetail" "$(jq -cn --arg k "$share_key" '{key:$k}')" "$token")"
+
+  # --- I2: global auth off; anonymous export must omit password-protected apps ---
+  if start_php_server "$PHP_OPEN_PORT" "$TMP_DIR/php-open.log" "UIC1_FIXTURE_OPEN=1"; then
+    PHP_OPEN_PID="$STARTED_PID"
+    STARTED_PID=""
+    local open_base="http://$PHP_HOST:$PHP_OPEN_PORT/apidoc/ui/v1"
+    check_php "anonymous export omits protected app" 200 \
+      '.code==0 and ([.data.apiData[] | select(.appKey=="default")] | length)==1 and ([.data.apiData[] | select(.appKey=="secure")] | length)==0 and (.data|tostring|contains("app-pw")|not)' \
+      "$(req POST "$open_base/exportAllData" '{}')"
+    check_php "anonymous protected-app export is 401" 401 \
+      '.code==4001' \
+      "$(req POST "$open_base/exportAllData" '{"appKey":"secure"}')"
+    stop_php_open
+  else
+    stop_php_pid "php-open" "$STARTED_PID" "$PHP_OPEN_PORT"
+    STARTED_PID=""
+    PHP_OK=0
+  fi
 
   stop_php
   return $((PHP_OK == 1 ? 0 : 1))
