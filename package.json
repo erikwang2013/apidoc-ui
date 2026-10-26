@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "vite --mode development",
     "build": "vue-tsc --noEmit && vite build",
+    "package:ui": "bash scripts/package-ui.sh",
+    "check:package-ui": "bash scripts/check-package-ui.sh",
     "preview": "vite preview",
     "build:dev": "vite build --mode development",
     "build:pro": "vite build --mode production",

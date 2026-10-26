@@ -57,6 +57,21 @@ npm run build   # vue-tsc 类型检查 + 构建，产物输出到 apidoc/ 目录
 2. 替换线上旧文件前先清空旧目录：新版 `index.html` 不再引用旧版哈希资源（`assets/*`、`utils/*`），残留无用且易被缓存；
 3. 改完 `config.js` 后强制刷新一次（Ctrl+F5）。`config.js?v=<版本号>` 为缓存戳，来自 package.json 的 version，发布新版即可自动失效旧缓存。
 
+## 打包共享 UI（UIC-1）
+
+PHP / Go / Rust 三端共用同一份构建。发布时使用打包脚本生成带版本清单的包：
+
+```bash
+npm run package:ui                        # 构建并输出 dist/uic1-ui/
+npm run package:ui -- --dest /srv/apidoc  # 额外复制到目标目录（可重复）
+SKIP_BUILD=1 npm run package:ui           # 复用 apidoc/ 现有产物
+npm run check:package-ui                  # 自检：重复打包哈希一致且与复算一致
+```
+
+目标目录必须已存在且为空，或包含上一次 `uic1-ui` 包（`manifest.json`）；脚本不会创建目录，也不会覆盖其他非空目录。复制只覆盖、不删除旧文件，升级前先清空旧目录。脚本要求 bash ≥ 4.4 与 GNU coreutils（`sha256sum`、`sort -z`），macOS 需安装 GNU coreutils。
+
+`dist/uic1-ui/manifest.json` 记录 `version`、`builtAt`、`gitCommit` 与内容 `sha256`；`builtAt` 是打包时间，`SKIP_BUILD=1` 时 `gitCommit` 不保证是产物构建提交（脚本会校验构建版本与 `package.json` 一致）。同一份包部署到三端后 `sha256` 应保持一致。升级步骤、后端配置（`BACKEND`、Rust `ui`/`ui_path`、Go `UIPath`）、版本矩阵与回滚见 [UIC-1 升级指南](docs/superpowers/guides/2026-10-26-uic1-upgrade.md)。
+
 ## 配置说明
 
 ### 后端地址（config.js）
@@ -88,6 +103,7 @@ window.apidocFeConfig = {
 
 | 配置                     | 说明                                            |
 | ------------------------ | ----------------------------------------------- |
+| `BACKEND`                | 后端类型覆盖：`auto` / `php` / `go` / `rust`（默认 `auto`） |
 | `TITLE`                  | 页面标题                                        |
 | `CACHE.PREFIX`           | 本地缓存键前缀                                  |
 | `MENU.WIDTH` / `SHOWURL` | 菜单宽度 / 是否显示接口 URL                     |
