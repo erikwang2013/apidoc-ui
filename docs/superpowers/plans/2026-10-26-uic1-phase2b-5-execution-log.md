@@ -57,3 +57,14 @@
 ## Final status
 
 Phase 2b–5 complete on `main` in all four repos. Phase 0–2 had already merged. Worktrees/branches remain until final review is signed off; no push was performed.
+
+## Final integration review fixes
+
+The final cross-repo review found four Important capability/test gaps; all were fixed and re-verified:
+
+- Rust debug modes are derived from the compiled relay set (no relay modes on a feature-disabled build); `http2` now maps to the HTTP executor; `rust-phase1`/`rust-full` fixtures match real feature sets; a Rust test compares the debug-all capabilities to `rust-full`.
+- Go `auth.global` now requires a non-empty password; `auth.app` reflects configured app passwords.
+- PHP no longer advertises browser-only `hls` as relay-capable.
+- E2E now serves the same `dist/uic1-ui` package from Go and Rust (`TestPackagedUIServed`, `packaged_ui_is_served_when_configured`) and verifies its manifest hash; `RESULT static-ui: PASS`.
+
+Final merged commits: UI `6460eaf`, PHP `acced13`, Go `78c6e52`, Rust `7756c88`.
