@@ -42,6 +42,47 @@ describe('buildAsyncApiJson', () => {
     )
   })
 
+  it('splits multiple messages on one address into single-message operations', () => {
+    const ws: ApiDetailResult = {
+      menuKey: 'ws%40chat',
+      name: 'chat',
+      title: 'Chat',
+      method: 'WS',
+      url: 'wss://example.com/chat',
+      protocol: { name: 'websocket', label: 'WebSocket' },
+      channel: { address: 'wss://example.com/chat', action: 'connect' },
+      definitions: [
+        {
+          format: 'asyncapi',
+          source: 'inline',
+          messages: [
+            { name: 'join', direction: 'request', fields: [] },
+            { name: 'leave', direction: 'request', fields: [] },
+            { name: 'joined', direction: 'response', fields: [] },
+          ],
+          validation: { ok: true, errors: [], warnings: [] },
+        },
+      ],
+    } as ApiDetailResult
+
+    const doc = buildAsyncApiJson([nodeOf(ws)], 'Demo')
+    const channels = Object.values(doc.channels) as any[]
+    // 2.6 每条 operation 只能有一个 message；同地址的多条消息拆成独立 channel。
+    expect(channels).toHaveLength(3)
+    const operations = channels.flatMap((c) => [c.publish, c.subscribe].filter((op) => !!op))
+    expect(operations.map((op) => op.operationId)).toEqual(
+      expect.arrayContaining([
+        'wss_example_com_chat_publish_1',
+        'wss_example_com_chat_publish_2',
+        'wss_example_com_chat_subscribe_1',
+      ]),
+    )
+    operations.forEach((op) => {
+      expect(op.message).toBeTruthy()
+      expect(op.messages).toBeUndefined()
+    })
+  })
+
   it('synthesizes a subscribe message when there is no definition', () => {
     const mqtt: ApiDetailResult = {
       menuKey: 'mqtt%40temp',

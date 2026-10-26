@@ -154,15 +154,17 @@ export function createUicAdapter(
       ),
   }
 
-  const exportAllData = async (params: ExportAllDataParams) =>
-    unwrapEnvelope<ExportAllDataResult>(
-      await http.post(
-        '/ui/v1/exportAllData',
-        params as unknown as Record<string, unknown>,
-        // `key` is a share record: its export is authorized by the share token.
-        tokenFor({ appKey: params.appKey, shareKey: params.key }),
-      ),
+  // `key` is the owner path and every backend gates it with the global token;
+  // `shareKey` is the share-viewer path and never falls back to the global token.
+  const exportAllData = async (params: ExportAllDataParams) => {
+    let token: string | undefined
+    if (params.shareKey) token = tokenFor({ shareKey: params.shareKey })
+    else if (params.key) token = getToken('global')
+    else token = tokenFor({ appKey: params.appKey })
+    return unwrapEnvelope<ExportAllDataResult>(
+      await http.post('/ui/v1/exportAllData', params as unknown as Record<string, unknown>, token),
     )
+  }
 
   return {
     kind: options.kind ?? 'uic',

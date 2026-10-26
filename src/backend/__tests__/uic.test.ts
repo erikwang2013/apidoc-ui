@@ -175,8 +175,34 @@ describe('createUicAdapter', () => {
       { key: 'share-1', index: 0 },
       'g',
     )
-    // 分享导出用分享 scope 的 token，而不是全局 token。
-    expect(http.post).toHaveBeenNthCalledWith(6, '/ui/v1/exportAllData', { key: 'share-1' }, 's')
+    // 属主导出（key）用全局 token；分享 token 不能借 key 路径读取分享。
+    expect(http.post).toHaveBeenNthCalledWith(6, '/ui/v1/exportAllData', { key: 'share-1' }, 'g')
+  })
+
+  it('routes share-viewer export through the share token', async () => {
+    const http = makeHttp()
+    http.post.mockResolvedValueOnce({ code: 0, message: 'ok', data: exportAll })
+    const tokens: Record<string, string> = { global: 'g', 'shareKey_share-1': 's' }
+    const adapter = createUicAdapter(http as any, caps, { getToken: (scope) => tokens[scope] })
+
+    expect((await adapter.exportAllData!({ shareKey: 'share-1' })).apiData).toHaveLength(1)
+    expect(http.post).toHaveBeenCalledWith('/ui/v1/exportAllData', { shareKey: 'share-1' }, 's')
+  })
+
+  it('does not attach the global token to a share-viewer export', async () => {
+    const http = makeHttp()
+    http.post.mockResolvedValueOnce({ code: 0, message: 'ok', data: exportAll })
+    const adapter = createUicAdapter(http as any, caps, {
+      getToken: (scope) => (scope === 'global' ? 'g' : undefined),
+    })
+
+    await adapter.exportAllData!({ shareKey: 'share-1' })
+
+    expect(http.post).toHaveBeenCalledWith(
+      '/ui/v1/exportAllData',
+      { shareKey: 'share-1' },
+      undefined,
+    )
   })
 
   it('routes cache and declarative generator calls', async () => {

@@ -35,7 +35,10 @@ export interface DocNode {
 export interface CollectDocOptions {
   /** 应用范围：appStore.appObject 的 key（叶子应用，可能逗号拼接） */
   appScopes: string[]
+  /** 分享页查看者：批量导出走 shareKey + 分享 token；文档读取透传 shareKey */
   shareKey?: string
+  /** 属主分享记录导出：批量接口走 key（全局 token），文档读取仍按 shareKey 过滤 */
+  key?: string
   lang?: string
 }
 
@@ -225,12 +228,9 @@ async function collectDocs(base: ApiMenusParams): Promise<DocNode[]> {
 }
 
 /** 基础请求参数（当前 app / 分享 key 走 payload 鉴权） */
-function baseOf(appKey: string, options: CollectDocOptions, appStore: any): ApiMenusParams {
-  const base: ApiMenusParams = {
-    appKey,
-    lang: options.lang !== undefined ? options.lang : appStore.lang,
-  }
-  if (options.shareKey) base.shareKey = options.shareKey
+function baseOf(appKey: string, shareKey: string | undefined, lang: string): ApiMenusParams {
+  const base: ApiMenusParams = { appKey, lang }
+  if (shareKey) base.shareKey = shareKey
   return base
 }
 
@@ -241,14 +241,16 @@ function baseOf(appKey: string, options: CollectDocOptions, appStore: any): ApiM
 export async function collectDoc(options: CollectDocOptions): Promise<DocNode[]> {
   const appStore = useAppOutsideStore()
   const nodes: DocNode[] = []
+  // 属主导出（key）与查看者导出（shareKey）都按分享范围过滤文档页。
+  const shareKey = options.shareKey || options.key
+  const lang = options.lang !== undefined ? options.lang : appStore.lang
 
   // 接口部分：单 app 或分享记录行 → 1 次 bulk 请求拿全部接口明细；其余逐 app
-  const singleOrShare = Boolean(options.shareKey) || options.appScopes.length === 1
+  const singleOrShare = Boolean(shareKey) || options.appScopes.length === 1
   if (singleOrShare) {
-    const bulkParams: ExportAllDataParams = {
-      lang: options.lang !== undefined ? options.lang : appStore.lang,
-    }
-    if (options.shareKey) bulkParams.key = options.shareKey
+    const bulkParams: ExportAllDataParams = { lang }
+    if (options.key) bulkParams.key = options.key
+    else if (options.shareKey) bulkParams.shareKey = options.shareKey
     else bulkParams.appKey = options.appScopes[0]
     const backend = getBackend()
     try {
@@ -266,18 +268,18 @@ export async function collectDoc(options: CollectDocOptions): Promise<DocNode[]>
       // 老后端无 exportAllData → 逐 app 逐叶回退
       if (!bulkUnavailable(error)) throw error
       for (const appKey of options.appScopes) {
-        nodes.push(...(await collectApiByRequests(baseOf(appKey, options, appStore))))
+        nodes.push(...(await collectApiByRequests(baseOf(appKey, shareKey, lang))))
       }
     }
   } else {
     for (const appKey of options.appScopes) {
-      nodes.push(...(await collectApiByRequests(baseOf(appKey, options, appStore))))
+      nodes.push(...(await collectApiByRequests(baseOf(appKey, shareKey, lang))))
     }
   }
 
   // 文档页
   for (const appKey of options.appScopes) {
-    nodes.push(...(await collectDocs(baseOf(appKey, options, appStore))))
+    nodes.push(...(await collectDocs(baseOf(appKey, shareKey, lang))))
   }
 
   // 按 app 归并分组：导出渲染按 appTitle 分节，接口与文档需保持同 app 相邻

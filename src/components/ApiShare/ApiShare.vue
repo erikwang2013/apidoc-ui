@@ -263,7 +263,7 @@
       }
     })
   }
-  // 导出分享记录可见范围：shareKey 走请求 payload 鉴权，遍历全部 app（后端按分享范围过滤）
+  // 导出分享记录可见范围：key 是属主路径（全局 token 鉴权），后端按分享范围过滤
   const onExportDoc = async (item, kind: 'md' | 'pdf' | 'openapi' | 'postman') => {
     if (state.exportingKey) return
     state.exportingKey = item.key
@@ -279,7 +279,7 @@
       }
       const nodes = await collectDoc({
         appScopes: Object.keys(appStore.appObject),
-        shareKey: item.key,
+        key: item.key,
       })
       if (!nodes.length) {
         message.warning(t('common.notdata'))

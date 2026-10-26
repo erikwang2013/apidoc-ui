@@ -48,7 +48,8 @@
 
 <script setup lang="ts">
   import { useAppStore } from '/@/store/modules/app'
-  import { featureEnabled } from '/@/backend/gating'
+  import { featureEnabled, generatorToolsVisible } from '/@/backend/gating'
+  import { cacheFeedback } from '/@/utils/helper/cacheFeedback'
   import { getBackend } from '/@/backend/state'
   import { useI18n } from '/@/hooks/useI18n'
   import { MenuInfo } from 'ant-design-vue/lib/menu/src/interface'
@@ -75,8 +76,8 @@
   const isUic = computed(
     () => !!appStore.capabilities && appStore.capabilities.contract !== 'legacy',
   )
-  const showGenerator = computed(
-    () => can('generator.forms') && !!appStore.serverConfig.generator?.length,
+  const showGenerator = computed(() =>
+    generatorToolsVisible(appStore.capabilities, appStore.serverConfig.generator),
   )
   const showCodeTemplate = computed(
     () => can('generator.templates') && !!appStore.serverConfig.code_template?.length,
@@ -166,11 +167,8 @@
       return res
     }
     const res = await backend.cache[op]()
-    if (res && res.mode === 'build') {
-      message.info(res.message || t('cache.buildMode'))
-    } else {
-      message.success(res?.message || fallback)
-    }
+    const feedback = cacheFeedback(res, fallback, t('cache.buildMode'))
+    message[feedback.level](feedback.text)
     return res
   }
 

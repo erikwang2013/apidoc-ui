@@ -273,8 +273,10 @@ export interface ExportSwaggerParams {
 
 export interface ExportAllDataParams {
   lang?: string
-  /** 分享记录 key（属主鉴权，按分享可见范围导出，同 exportSwagger） */
+  /** 分享记录 key（属主路径，全局 token 鉴权，按分享可见范围导出，同 exportSwagger） */
   key?: string
+  /** 分享页查看者（分享 token 鉴权，按分享范围导出） */
+  shareKey?: string
   /** 应用 key（整棵应用树导出，与 key 二选一） */
   appKey?: string
 }

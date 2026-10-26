@@ -33,53 +33,67 @@ function operationId(channel: string, direction: string): string {
   return id ? `${id}_${direction}` : `channel_${direction}`
 }
 
-/** 同 channel 同方向多条消息：AsyncAPI 2.6 用 messages 数组，单条用 message */
-function addOperation(
-  channel: Obj,
-  address: string,
-  direction: 'publish' | 'subscribe',
-  incoming: Obj[],
-) {
-  const existing = channel[direction]
-  const messages = existing
-    ? [...(existing.messages || [existing.message]), ...incoming]
-    : incoming
-  channel[direction] =
-    messages.length === 1
-      ? { operationId: operationId(address, direction), message: messages[0] }
-      : { operationId: operationId(address, direction), messages }
-}
+type Direction = 'publish' | 'subscribe'
+type PendingChannel = Record<Direction, Obj[]>
+
+const directionsOf = (pending: PendingChannel): Array<[Direction, Obj[]]> => [
+  ['publish', pending.publish],
+  ['subscribe', pending.subscribe],
+]
 
 const messagesOf = (detail: ApiDetailResult): ApiMessageInfo[] =>
   (detail.definitions || []).flatMap((def) => def.messages || [])
 
 export function buildAsyncApiJson(nodes: DocNode[], title: string): Obj {
-  const channels: Obj = {}
+  const pending: Record<string, PendingChannel> = {}
   nodes.forEach((node) => {
     if (node.kind !== 'api' || !node.detail) return
     const detail = node.detail
     if (!ASYNC_PROTOCOLS.has(detail.protocol?.name || '')) return
     const address = detail.channel?.address || node.url
     if (!address) return
-    const channel = (channels[address] = channels[address] || {})
-    const publish: Obj[] = []
-    const subscribe: Obj[] = []
-    messagesOf(detail).forEach((msg) => {
-      const target = PUBLISH_DIRECTIONS.has(String(msg.direction)) ? publish : subscribe
-      target.push({ name: msg.name, payload: payloadOf(msg.fields) })
-    })
-    if (!publish.length && !subscribe.length) {
+    const bucket = (pending[address] = pending[address] || { publish: [], subscribe: [] })
+    const messages = messagesOf(detail)
+    if (!messages.length) {
       // 无定义文件（如 webhook）：按 channel.action 合成一条消息。
       const action = String(detail.channel?.action || '').toLowerCase()
       const direction = PUBLISH_ACTIONS.some((a) => action.includes(a)) ? 'publish' : 'subscribe'
       const fields = direction === 'publish' ? detail.param : detail.responseSuccess || detail.param
-      addOperation(channel, address, direction, [
-        { name: node.title || address, payload: payloadOf(fields) },
-      ])
+      bucket[direction].push({ name: node.title || address, payload: payloadOf(fields) })
       return
     }
-    if (publish.length) addOperation(channel, address, 'publish', publish)
-    if (subscribe.length) addOperation(channel, address, 'subscribe', subscribe)
+    messages.forEach((msg) => {
+      const target = PUBLISH_DIRECTIONS.has(String(msg.direction))
+        ? bucket.publish
+        : bucket.subscribe
+      target.push({ name: msg.name, payload: payloadOf(msg.fields) })
+    })
+  })
+
+  const channels: Obj = {}
+  Object.keys(pending).forEach((address) => {
+    const channel = pending[address]
+    if (channel.publish.length <= 1 && channel.subscribe.length <= 1) {
+      const item: Obj = {}
+      directionsOf(channel).forEach(([direction, messages]) => {
+        if (messages.length) {
+          item[direction] = { operationId: operationId(address, direction), message: messages[0] }
+        }
+      })
+      channels[address] = item
+      return
+    }
+    // AsyncAPI 2.6 的 Operation.message 是单值：同地址多条消息各拆一个 channel 条目。
+    directionsOf(channel).forEach(([direction, messages]) => {
+      messages.forEach((message, index) => {
+        channels[`${address}~${direction}_${index + 1}`] = {
+          [direction]: {
+            operationId: `${operationId(address, direction)}_${index + 1}`,
+            message,
+          },
+        }
+      })
+    })
   })
   return { asyncapi: '2.6.0', info: { title, version: '1.0.0' }, channels }
 }

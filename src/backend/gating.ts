@@ -14,6 +14,12 @@ export const featureEnabled = (capabilities: Capabilities | undefined, path: str
   return readPath(capabilities.features, path) === true
 }
 
+/** 生成器入口：能力声明 generator.forms 且服务端配置了生成器列表。 */
+export const generatorToolsVisible = (
+  capabilities: Capabilities | undefined,
+  generators: unknown[] | undefined,
+): boolean => featureEnabled(capabilities, 'generator.forms') && !!generators?.length
+
 export const debugModeEnabled = (
   capabilities: Capabilities | undefined,
   mode: DebugMode | string | undefined,
