@@ -54,7 +54,7 @@
           "generator": {
             "forms": true,
             "templates": true,
-            "sideEffects": false
+            "sideEffects": true
           },
           "exports": [
             "md",
@@ -103,23 +103,30 @@
           },
           "share": {
             "link": true,
-            "records": false,
-            "actions": false
+            "records": true,
+            "actions": true
           },
           "cache": {
-            "manage": false,
+            "manage": true,
             "mode": "server"
           },
           "generator": {
-            "forms": false,
-            "templates": false,
+            "forms": true,
+            "templates": true,
             "sideEffects": false
           },
-          "exports": [],
+          "exports": [
+            "md",
+            "pdf",
+            "openapi",
+            "postman",
+            "asyncapi",
+            "typescript"
+          ],
           "auth": {
             "global": true,
             "app": true,
-            "shareToken": false
+            "shareToken": true
           }
         }
       }
@@ -168,23 +175,30 @@
           },
           "share": {
             "link": true,
-            "records": false,
-            "actions": false
+            "records": true,
+            "actions": true
           },
           "cache": {
-            "manage": false,
+            "manage": true,
             "mode": "build"
           },
           "generator": {
-            "forms": false,
+            "forms": true,
             "templates": true,
             "sideEffects": false
           },
-          "exports": [],
+          "exports": [
+            "md",
+            "pdf",
+            "openapi",
+            "postman",
+            "asyncapi",
+            "typescript"
+          ],
           "auth": {
             "global": true,
             "app": true,
-            "shareToken": false
+            "shareToken": true
           }
         }
       }

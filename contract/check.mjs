@@ -11,6 +11,7 @@ const names = [
   'share',
   'generator',
   'export',
+  'cache',
 ]
 
 const load = (name) =>
@@ -58,7 +59,12 @@ const checks = {
   },
   export: (data) => {
     if (Array.isArray(data.apiData)) return
-    assert.equal(data.openapi, '3.0.0')
+    if (data.openapi === '3.0.0') return
+    assert.equal(data.asyncapi, '2.6.0')
+  },
+  cache: (data) => {
+    assert.equal(typeof data.ok, 'boolean')
+    assert.ok(['server', 'build'].includes(data.mode))
   },
 }
 
