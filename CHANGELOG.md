@@ -17,7 +17,7 @@
   代码模板，以及 Swagger/OpenAPI、Postman、AsyncAPI 导出。
 - 共享 UI 打包：`npm run package:ui` 生成 `dist/uic1-ui/` 与 `manifest.json`
   （version / gitCommit / sha256），同一份包可部署到三端；附升级与回滚指南。
-- 发布流程：`VERSION` 文件与 `.github/workflows/release.yml`（push main 自动打 tag 并
+- 发布流程：`VERSION` 文件与 `.github/workflows/release.yml`（push master 自动打 tag 并
   创建 GitHub Release）。
 
 ### Fixed
