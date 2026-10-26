@@ -53,7 +53,7 @@ manifest.json
 
 | 字段        | 含义                                                                 |
 | ----------- | -------------------------------------------------------------------- |
-| `version`   | 打包时 `package.json` 的版本（当前 3.3.0）                           |
+| `version`   | 打包时 `package.json` 的版本（当前 3.4.0）                           |
 | `name`      | 固定 `uic1-ui`                                                       |
 | `builtAt`   | **打包时间**（UTC，ISO 8601），不是资源构建时间                      |
 | `gitCommit` | **打包时** UI 仓库提交，未重新构建时不保证等于产物构建提交           |
@@ -215,7 +215,7 @@ s := apidoc.New(apidoc.Config{
 | Rust Vue UI              | 含 5R.1 的版本，`ui: UiMode::Vue` + `ui_path: Some(...)` | 同源，`HOSTS: []`             | `/apidoc/` 直接打开           |
 | Rust 原生 UI（回滚）     | `ui: UiMode::Native`（库默认）                      | 同源                               | 旧原生界面                    |
 
-当前基线：**apidoc-ui 3.3.0 / UIC-1 contract 1.0**。同一 major 内契约只做加法；
+当前基线：**apidoc-ui 3.4.0 / UIC-1 contract 1.0**。同一 major 内契约只做加法；
 UI 按能力降级，不按后端类型硬编码。后端发布版本以各自 CHANGELOG 为准。
 
 ## 7. 已知语义差异

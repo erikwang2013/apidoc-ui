@@ -1,0 +1,47 @@
+name: release
+
+# 推送规则：push 到 main 后读取根目录 VERSION；对应 tag 不存在时创建
+# tag 与 GitHub Release（每次运行只补齐尚未发布的版本）。
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # 完整历史，避免浅克隆导致 tag 比对失败
+          fetch-depth: 0
+
+      - name: 获取最新版本
+        id: version
+        run: |
+          VERSION=$(cat VERSION | tr -d ' \n')
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: 创建缺失的 tag 和 release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          TAG="v${VERSION}"
+          if git rev-parse -q --verify "refs/tags/${TAG}" >/dev/null; then
+            echo "tag ${TAG} 已存在，跳过"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag "${TAG}"
+          git push origin "${TAG}"
+          gh release create "${TAG}" --title "${TAG}" --generate-notes
+          echo "已创建 ${TAG} tag + release"

@@ -2,6 +2,8 @@
 window.apidocFeConfig = {
   // 标题
   TITLE: "Apidoc",
+  // 后端类型：auto（自动探测）| php | go | rust
+  // BACKEND: "auto",
   // 是否显示版本号（首页底部）
   SHOW_VERSION: true,
   // 缓存配置

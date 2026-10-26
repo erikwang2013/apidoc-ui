@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" width="1280" height="640" role="img" aria-label="ApiDoc UI — Vue3 + TypeScript 实现的 API 文档前端界面">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" width="1280" height="640" role="img" aria-label="ApiDoc UI — Vue3 + TypeScript 静态 API 文档前端，PHP / Go / Rust 三端共用">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#F4F1FE"/>
@@ -73,8 +73,8 @@
 
   <text x="104" y="420" font-family="Noto Sans CJK SC, sans-serif" font-size="32" fill="#5C5680">Vue3 + TypeScript 实现的 API 文档前端界面</text>
 
-  <text x="104" y="482" font-family="Noto Sans CJK SC, sans-serif" font-size="28" fill="#8B86AD">在线调试 · Mock 数据 · Json/TypeScript 生成 · 接口分享</text>
+  <text x="104" y="482" font-family="Noto Sans CJK SC, sans-serif" font-size="28" fill="#8B86AD">在线调试 · 多协议中继 · 9 种协议定义校验 · 接口分享</text>
 
-  <text x="104" y="528" font-family="Noto Sans CJK SC, sans-serif" font-size="26" fill="#6C5CE7">协议调试面板 · 协议定义校验 · 多语言</text>
+  <text x="104" y="528" font-family="Noto Sans CJK SC, sans-serif" font-size="26" fill="#6C5CE7">PHP / Go / Rust 三端共用同一份静态 UI · 多语言</text>
   <text x="104" y="576" font-family="Source Han Mono, Noto Sans Mono CJK SC, monospace" font-size="24" fill="#A5A0C4">github.com/erikwang2013/apidoc-ui</text>
 </svg>
