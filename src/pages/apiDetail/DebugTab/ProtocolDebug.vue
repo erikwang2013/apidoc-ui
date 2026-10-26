@@ -98,6 +98,7 @@
 <script setup lang="ts">
   import { message } from 'ant-design-vue'
   import ProtocolBadge from '/@/components/ProtocolBadge'
+  import { getBackend } from '/@/backend/state'
   import { ApiDebugResult, ApiDetailResult } from '/@/api/apidocApi/types'
   import { useI18n } from '/@/hooks/useI18n'
   import ProtocolFields from './ProtocolFields.vue'
@@ -272,7 +273,7 @@
     if (relayDisabled.value || state.sending || !validateFields()) return
     const seq = ++sendSeq
     state.sending = true
-    sendRelay(props.detail, { ...state.model })
+    sendRelay(getBackend().debug, props.detail, { ...state.model })
       .then((result) => {
         if (seq === sendSeq) appendResult(result)
       })
@@ -305,7 +306,7 @@
     streamSeq++
     if (notify && sessionId && detail) {
       try {
-        await stopStream(detail, sessionId)
+        await stopStream(getBackend().debug, detail, sessionId)
       } catch (error) {
         // 会话到期后服务端自行回收,关闭失败无需提示
       }
@@ -331,7 +332,7 @@
     const sessionId = state.sessionId
     const detail = streamDetail
     try {
-      const result = await pollStream(detail, sessionId)
+      const result = await pollStream(getBackend().debug, detail, sessionId)
       if (seq !== streamSeq) return
       if (result.ok === false) {
         const expired = /session not found or expired/i.test(result.error ?? '')
@@ -363,10 +364,10 @@
     renewing = renew
     state.sending = true
     try {
-      const result: RelayStartResult = await startStream(detail, input)
+      const result: RelayStartResult = await startStream(getBackend().debug, detail, input)
       if (seq !== streamSeq) {
         // 已停止或 detail 已切换:回收刚建立的会话,且不得回写流状态
-        if (result.sessionId) stopStream(detail, result.sessionId).catch(() => {})
+        if (result.sessionId) stopStream(getBackend().debug, detail, result.sessionId).catch(() => {})
         return
       }
       if (!result.sessionId) {

@@ -1,5 +1,5 @@
-import debugApi from '/@/api/debugApi'
 import { DebugPollParams } from '/@/api/debugApi/types'
+import type { DebugAdapter } from '/@/backend/types'
 import { ApiDetailResult } from '/@/api/apidocApi/types'
 import router from '/@/router'
 import { DebugEncoding, ProtocolDebugModel } from './types'
@@ -42,8 +42,7 @@ const routeScope = (): { shareKey?: string; lang?: string } => {
 
 const runParams = (detail: ApiDetailResult, input: ProtocolDebugModel): RelayParams => ({
   appKey: String(detail.appKey ?? ''),
-  // menuKey 是 urlencode 后的 Class@method,中继端点不接受编码形式
-  path: decodeURIComponent(detail.menuKey),
+  path: detail.menuKey,
   input: { ...input },
   ...routeScope(),
 })
@@ -55,18 +54,26 @@ const sessionParams = (detail: ApiDetailResult, sessionId: string): DebugPollPar
   ...routeScope(),
 })
 
-export const sendRelay = async (detail: ApiDetailResult, input: ProtocolDebugModel) =>
-  (await debugApi.send(runParams(detail, input))).data
-
-export const startStream = async (
+export const sendRelay = async (
+  backend: DebugAdapter,
   detail: ApiDetailResult,
   input: ProtocolDebugModel,
-): Promise<RelayStartResult> => (await debugApi.start(runParams(detail, input))).data
+) => backend.send(runParams(detail, input))
+
+export const startStream = async (
+  backend: DebugAdapter,
+  detail: ApiDetailResult,
+  input: ProtocolDebugModel,
+): Promise<RelayStartResult> => backend.start(runParams(detail, input))
 
 export const pollStream = async (
+  backend: DebugAdapter,
   detail: ApiDetailResult,
   sessionId: string,
-): Promise<RelayPollResult> => (await debugApi.poll(sessionParams(detail, sessionId))).data
+): Promise<RelayPollResult> => backend.poll(sessionParams(detail, sessionId))
 
-export const stopStream = async (detail: ApiDetailResult, sessionId: string) =>
-  (await debugApi.stop(sessionParams(detail, sessionId))).data
+export const stopStream = async (
+  backend: DebugAdapter,
+  detail: ApiDetailResult,
+  sessionId: string,
+) => backend.stop(sessionParams(detail, sessionId))

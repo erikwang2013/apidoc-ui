@@ -1,0 +1,29 @@
+[
+  {
+    "name": "cache-clear-server",
+    "request": {},
+    "response": {
+      "code": 0,
+      "message": "ok",
+      "data": { "ok": true, "mode": "server" }
+    }
+  },
+  {
+    "name": "cache-warm-server",
+    "request": {},
+    "response": {
+      "code": 0,
+      "message": "ok",
+      "data": { "ok": true, "mode": "server", "message": "cache rebuilt" }
+    }
+  },
+  {
+    "name": "cache-build-mode",
+    "request": {},
+    "response": {
+      "code": 0,
+      "message": "ok",
+      "data": { "ok": true, "mode": "build", "message": "build-time materialized" }
+    }
+  }
+]

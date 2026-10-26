@@ -1,0 +1,174 @@
+[
+  {
+    "name": "php-http-get-users",
+    "request": { "appKey": "default", "path": "users%40listUsers" },
+    "response": {
+      "code": 0,
+      "message": "ok",
+      "data": {
+        "name": "listUsers",
+        "title": "List users",
+        "menuKey": "users%40listUsers",
+        "method": "GET",
+        "url": "/users",
+        "appKey": "default",
+        "author": "erik",
+        "tag": ["users"],
+        "desc": "List users",
+        "contentType": "application/json",
+        "paramType": "json",
+        "notDebug": false,
+        "header": [
+          {
+            "name": "Authorization",
+            "type": "string",
+            "desc": "Bearer token",
+            "require": false,
+            "default": ""
+          }
+        ],
+        "query": [
+          {
+            "name": "page",
+            "type": "int",
+            "desc": "page number",
+            "require": false,
+            "default": "1",
+            "mock": "1"
+          }
+        ],
+        "routeParam": [],
+        "param": [],
+        "responseSuccess": [
+          { "name": "id", "type": "int", "desc": "user id", "require": true, "mock": "1" },
+          { "name": "name", "type": "string", "desc": "user name", "require": true, "mock": "erik" }
+        ],
+        "responseError": [
+          { "name": "message", "type": "string", "desc": "error", "require": true, "mock": "not found" }
+        ],
+        "responseStatus": [
+          { "name": "200", "desc": "OK" },
+          { "name": "404", "desc": "Not Found" }
+        ],
+        "md": "### List users",
+        "responseSuccessMd": "```json\n{\"id\":1,\"name\":\"erik\"}\n```",
+        "responseErrorMd": "```json\n{\"message\":\"not found\"}\n```",
+        "protocol": {
+          "name": "http",
+          "label": "HTTP",
+          "transport": "http",
+          "mode": "browser-http",
+          "http": true,
+          "debuggable": true,
+          "debugReason": ""
+        },
+        "channel": { "address": "/users", "action": "GET", "meta": {} },
+        "debug": {
+          "mode": "browser-http",
+          "driver": "http",
+          "relayEnabled": true,
+          "debuggable": true,
+          "debugReason": "",
+          "fields": [],
+          "defaults": {},
+          "meta": {},
+          "responseEncoding": "json",
+          "hints": ""
+        },
+        "definitions": [],
+        "validation": { "ok": true, "errors": [], "warnings": [] }
+      }
+    }
+  },
+  {
+    "name": "php-ws-chat",
+    "request": { "appKey": "default", "path": "ws%40chat" },
+    "response": {
+      "code": 0,
+      "message": "ok",
+      "data": {
+        "name": "chat",
+        "title": "Chat",
+        "menuKey": "ws%40chat",
+        "method": "*",
+        "url": "wss://example.com/chat",
+        "appKey": "default",
+        "author": "erik",
+        "tag": ["ws"],
+        "desc": "Chat channel",
+        "notDebug": false,
+        "header": [],
+        "query": [],
+        "routeParam": [],
+        "param": [],
+        "responseSuccess": [],
+        "responseError": [],
+        "responseStatus": [],
+        "protocol": {
+          "name": "websocket",
+          "label": "WebSocket",
+          "transport": "ws",
+          "mode": "browser-websocket",
+          "http": false,
+          "debuggable": true,
+          "debugReason": ""
+        },
+        "channel": {
+          "address": "wss://example.com/chat",
+          "action": "connect",
+          "meta": { "room": "lobby" }
+        },
+        "debug": {
+          "mode": "browser-websocket",
+          "driver": "websocket",
+          "relayEnabled": false,
+          "debuggable": true,
+          "debugReason": "",
+          "fields": [
+            {
+              "name": "target",
+              "type": "string",
+              "in": "target",
+              "require": true,
+              "default": "wss://example.com/chat",
+              "desc": "WebSocket target"
+            },
+            {
+              "name": "room",
+              "type": "string",
+              "in": "query",
+              "require": false,
+              "default": "lobby",
+              "desc": "room"
+            }
+          ],
+          "defaults": { "target": "wss://example.com/chat" },
+          "meta": {},
+          "responseEncoding": "text",
+          "hints": "Browser WebSocket cannot send custom headers; put auth in the query string."
+        },
+        "definitions": [
+          {
+            "format": "asyncapi",
+            "source": "inline",
+            "operation": "connect",
+            "meta": { "protocol": "websocket" },
+            "messages": [
+              {
+                "name": "join",
+                "direction": "out",
+                "fields": [
+                  { "name": "room", "type": "string", "require": true, "desc": "room" }
+                ],
+                "sample": "{\"room\":\"lobby\"}",
+                "sampleValidation": { "ok": true, "errors": [], "warnings": [] }
+              }
+            ],
+            "validation": { "ok": true, "errors": [], "warnings": [] }
+          }
+        ],
+        "validation": { "ok": true, "errors": [], "warnings": [] }
+      }
+    }
+  }
+]

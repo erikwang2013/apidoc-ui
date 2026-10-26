@@ -13,7 +13,8 @@
     "lint:prettier": "prettier --write  \"src/**/*.{js,json,tsx,css,less,scss,vue,html,md}\"",
     "lint:stylelint": "stylelint --cache --fix \"**/*.{vue,less,postcss,css,scss}\" --cache --cache-location node_modules/.cache/stylelint/",
     "lint:lint-staged": "lint-staged",
-    "deps": "yarn upgrade-interactive --latest"
+    "deps": "yarn upgrade-interactive --latest",
+    "test": "vitest run"
   },
   "dependencies": {
     "@ant-design/icons-vue": "^6.0.1",
@@ -65,6 +66,7 @@
     "vite-plugin-compression": "^0.5.1",
     "vite-plugin-html": "^3.2.2",
     "vite-plugin-svg-icons": "^2.0.1",
+    "vitest": "^3.2.7",
     "vue-tsc": "^2.2.0"
   },
   "lint-staged": {

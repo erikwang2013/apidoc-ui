@@ -26,7 +26,7 @@
 <script lang="ts" setup>
   import { useAppStore } from '/@/store'
   import { useI18n } from '/@/hooks/useI18n'
-  import apidocApi from '/@/api/apidocApi'
+  import { getBackend } from '/@/backend/state'
   import { message } from 'ant-design-vue'
   import md5 from 'js-md5'
   import { VerifyAuthParams } from '/@/api/apidocApi/types'
@@ -69,7 +69,8 @@
       message.error(t('auth.input.placeholder'))
       return
     }
-    const password = md5(state.password)
+    const backend = getBackend()
+    const password = backend.authHashesPassword ? md5(state.password) : state.password
     let json: VerifyAuthParams = {
       appKey: appStore.appKey,
       password,
@@ -77,16 +78,15 @@
     if (appStore.shareKey) {
       json.shareKey = appStore.shareKey as string
     }
-    apidocApi
+    backend
       .verifyAuth(json)
       .then((res) => {
-        if (res.code !== 0 || !(res.data && res.data.token)) {
-          res.message && message.error(res.message)
+        if (!res || !res.token) {
+          message.error(t('auth.input.placeholder'))
           return false
         }
-        const token = res.data.token
         const key = appStore.shareKey ? 'shareKey_' + appStore.shareKey : appStore.appKey
-        appStore.setAppAuth(key, token)
+        appStore.setAppAuth(key, res.token)
         props.onSuccess && props.onSuccess()
         state.visible = false
       })

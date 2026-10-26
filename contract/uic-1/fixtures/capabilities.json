@@ -1,0 +1,207 @@
+[
+  {
+    "name": "php-full",
+    "request": {},
+    "response": {
+      "code": 0,
+      "message": "ok",
+      "data": {
+        "contract": "1.0",
+        "backend": "php",
+        "version": "1.1.0",
+        "features": {
+          "menus": true,
+          "detail": true,
+          "docs": true,
+          "protocolDefinitions": true,
+          "debug": {
+            "browser": [
+              "http",
+              "websocket",
+              "sse"
+            ],
+            "relay": [
+              "raw",
+              "http-relay",
+              "mqtt",
+              "stomp",
+              "coap",
+              "modbus-tcp",
+              "iso8583",
+              "rtsp",
+              "sip",
+              "grpc",
+              "hessian",
+              "hls"
+            ],
+            "modes": [
+              "browser-http",
+              "browser-websocket",
+              "browser-sse",
+              "relay-unary",
+              "relay-stream"
+            ]
+          },
+          "share": {
+            "link": true,
+            "records": true,
+            "actions": false
+          },
+          "cache": {
+            "manage": true,
+            "mode": "server"
+          },
+          "generator": {
+            "forms": true,
+            "templates": true,
+            "sideEffects": true
+          },
+          "exports": [
+            "md",
+            "pdf",
+            "openapi",
+            "postman",
+            "asyncapi",
+            "typescript"
+          ],
+          "auth": {
+            "global": true,
+            "app": true,
+            "shareToken": true
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "go-phase1",
+    "request": {},
+    "response": {
+      "code": 0,
+      "message": "ok",
+      "data": {
+        "contract": "1.0",
+        "backend": "go",
+        "version": "1.1.0",
+        "features": {
+          "menus": true,
+          "detail": true,
+          "docs": true,
+          "protocolDefinitions": true,
+          "debug": {
+            "browser": [
+              "http",
+              "websocket",
+              "sse"
+            ],
+            "relay": [],
+            "modes": [
+              "browser-http",
+              "browser-websocket",
+              "browser-sse"
+            ]
+          },
+          "share": {
+            "link": true,
+            "records": true,
+            "actions": true
+          },
+          "cache": {
+            "manage": true,
+            "mode": "server"
+          },
+          "generator": {
+            "forms": true,
+            "templates": true,
+            "sideEffects": false
+          },
+          "exports": [
+            "md",
+            "pdf",
+            "openapi",
+            "postman",
+            "asyncapi",
+            "typescript"
+          ],
+          "auth": {
+            "global": true,
+            "app": true,
+            "shareToken": true
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "rust-phase1",
+    "request": {},
+    "response": {
+      "code": 0,
+      "message": "ok",
+      "data": {
+        "contract": "1.0",
+        "backend": "rust",
+        "version": "2.2.0",
+        "features": {
+          "menus": true,
+          "detail": true,
+          "docs": true,
+          "protocolDefinitions": true,
+          "debug": {
+            "browser": [
+              "http",
+              "websocket",
+              "sse"
+            ],
+            "relay": [
+              "http",
+              "websocket",
+              "sse",
+              "grpc",
+              "thrift",
+              "dubbo",
+              "mqtt",
+              "tcp",
+              "udp",
+              "unix"
+            ],
+            "modes": [
+              "browser-http",
+              "browser-websocket",
+              "browser-sse",
+              "relay-unary",
+              "relay-stream"
+            ]
+          },
+          "share": {
+            "link": true,
+            "records": true,
+            "actions": false
+          },
+          "cache": {
+            "manage": true,
+            "mode": "build"
+          },
+          "generator": {
+            "forms": true,
+            "templates": true,
+            "sideEffects": false
+          },
+          "exports": [
+            "md",
+            "pdf",
+            "openapi",
+            "postman",
+            "asyncapi",
+            "typescript"
+          ],
+          "auth": {
+            "global": true,
+            "app": true,
+            "shareToken": true
+          }
+        }
+      }
+    }
+  }
+]

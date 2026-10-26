@@ -1,9 +1,11 @@
 import { defineStore } from 'pinia'
 import piniaStore from '/@/store/index'
 import { AppState, APP_THEME, APP_LANG, APP_AUTH } from './types'
+import type { Capabilities } from '/@/backend/types'
+import { authKey } from '/@/utils/helper/authKey'
 import Cache from '/@/utils/cache'
+import { getBackend } from '/@/backend/state'
 import { ThemeEnum } from '/@/enums/appEnum'
-import globalApi from '/@/api/globalApi'
 import { ConfigParams } from '/@/api/globalApi/types'
 import { FeConfig } from '/@/store/modules/app/types'
 import { parseRouteKey } from '/@/utils/helper'
@@ -38,6 +40,7 @@ export const useAppStore = defineStore('app', {
     lang: '',
     keepAliveKeys: [],
     appAuth: {},
+    capabilities: undefined,
     globalError: {
       config: {} as any,
       isAxiosError: false,
@@ -97,19 +100,20 @@ export const useAppStore = defineStore('app', {
     },
     fetchSeverConfig(params: ConfigParams) {
       return new Promise((resolve, reject) => {
-        globalApi
-          .getConfig(params)
-          .then((res) => {
-            const { appObject, count } = handleApps(res.data.apps)
+        getBackend()
+          .config(params)
+          .then((config) => {
+            const apps = config.apps || []
+            const { appObject, count } = handleApps(apps)
             this.appObject = appObject
             const apidocStore = useApidocOutsideStore()
             apidocStore.setDashboard({
               appCount: count,
             })
 
-            document.title = res.data.title as string
+            document.title = (config.title as string) || this.title
 
-            this.serverConfig = res.data
+            this.serverConfig = config
             if (params.appKey) {
               const activeApp = appObject[params.appKey]
               if (activeApp) {
@@ -121,7 +125,7 @@ export const useAppStore = defineStore('app', {
                 return
               }
             }
-            if (res.data.apps.length) {
+            if (apps.length) {
               this.appKey = Object.keys(appObject)[0]
             }
             resolve({
@@ -137,16 +141,44 @@ export const useAppStore = defineStore('app', {
     setAppKey(appKey: string) {
       this.appKey = appKey
     },
-    initAppAuth() {
-      const appAuth = Cache.get(APP_AUTH)
-      if (appAuth) {
-        this.appAuth = appAuth
+    getApiHost() {
+      const hosts = this.feConfig.HTTP.HOSTS
+      if (hosts && hosts.length) {
+        const cacheHost = Cache.get('HOST')
+        const find = cacheHost ? hosts.find((item) => item.host === cacheHost) : undefined
+        return (find || hosts[0]).host || 'same-origin'
       }
+      return typeof window !== 'undefined' ? window.location.origin : 'same-origin'
     },
-    setAppAuth(appKey, token) {
-      const key = appKey ? appKey : 'global'
+    getAppAuth(scope: string, host?: string) {
+      return this.appAuth[authKey(host ?? this.getApiHost(), scope)]
+    },
+    initAppAuth() {
+      const stored = Cache.get(APP_AUTH) || {}
+      const host = this.getApiHost()
+      const next: Record<string, string> = {}
+      let migrated = false
+      for (const key of Object.keys(stored)) {
+        if (key.includes('|')) {
+          next[key] = stored[key]
+        } else {
+          // Old tokens were not host-scoped; attach them to the current host once.
+          next[authKey(host, key)] = stored[key]
+          migrated = true
+        }
+      }
+      if (migrated) {
+        Cache.set(APP_AUTH, next)
+      }
+      this.appAuth = next
+    },
+    setAppAuth(scope: string, token: string) {
+      const key = authKey(this.getApiHost(), scope || 'global')
       this.appAuth[key] = token
       Cache.set(APP_AUTH, this.appAuth)
+    },
+    setCapabilities(capabilities: Capabilities) {
+      this.capabilities = capabilities
     },
     setGlobalError(error) {
       this.globalError = error

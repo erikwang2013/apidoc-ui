@@ -132,6 +132,7 @@ window.apidocFeConfig = {
         "common.please.input": "请输入",
         "common.please.select": "请选择",
         "common.file.name": "文件名",
+        "common.download": "下载",
         "common.appOrVersion": "应用/版本",
         "common.allAppOption": "全部应用",
         "common.ms": "毫秒",
@@ -222,6 +223,7 @@ window.apidocFeConfig = {
         "cache.createAllApi":"生成所有Api缓存",
         "cache.createAllConfirm":"您确认生成所有Api缓存吗？",
         "cache.createSuccess":"生成成功",
+        "cache.buildMode":"该后端文档在构建期物化，无需运行时清理或重建",
         
         "layout.menu.reload": "更新菜单",
         "layout.menu.openAll": "展开全部",
@@ -281,6 +283,9 @@ window.apidocFeConfig = {
         "generator.table.name.placeholder": "请输入表名",
         "generator.table.row.error": "第{rows}行，字段名、类型必填",
         "generator.submitSuccess": "生成成功",
+        "generator.renderSuccess": "渲染完成，可预览或下载生成的文件",
+        "generator.result.title": "渲染结果",
+        "generator.sideEffectsWarning": "注意：该生成器可能执行代码并写入源码文件或数据库表，请确认后再执行。",
         "tools.title": "工具",
         "codeTemplate.title":"代码模板",
         "codeTemplate.reload":"重新生成",
@@ -303,6 +308,8 @@ window.apidocFeConfig = {
         "exportDoc.generating":"正在导出文档…",
         "exportDoc.openapi":"导出 Swagger/OpenAPI JSON",
         "exportDoc.postman":"导出 Postman JSON",
+        "exportDoc.asyncapi":"导出 AsyncAPI JSON",
+        "exportDoc.asyncapiEmpty":"当前应用没有可导出的异步协议接口",
 
 
         

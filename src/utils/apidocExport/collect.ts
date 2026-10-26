@@ -14,6 +14,8 @@ import type {
   ExportAllDataParams,
   ExportAppNode,
 } from '/@/api/apidocApi/types'
+import { getBackend } from '/@/backend/state'
+import type { BackendAdapter } from '/@/backend/types'
 import { useAppOutsideStore } from '/@/store/modules/app'
 
 /** 导出用文档节点：kind='api' 为接口，kind='doc' 为文档页 */
@@ -31,10 +33,26 @@ export interface DocNode {
 }
 
 export interface CollectDocOptions {
-  /** 应用范围：appStore.appObject 的 key（叶子应用，可能逗号拼接） */
+  /** 应用范围：appStore.appObject 的 key（叶子应用，可能逗号拼接），决定文档页读取范围 */
   appScopes: string[]
+  /** 分享页查看者：批量导出走 shareKey + 分享 token；文档读取透传 shareKey */
   shareKey?: string
+  /** 属主分享记录导出：批量接口走 key（全局 token），文档按 appScopes 逐 app 读取 */
+  key?: string
   lang?: string
+}
+
+/**
+ * 属主分享导出的 app 范围：优先分享的 appKeys；api 类型且无 appKeys 时
+ * 没有可安全导出的文档范围（返回空，跳过文档），其余空 appKeys 回退全部 app。
+ */
+export function ownerExportAppScopes(
+  share: { type?: string; appKeys?: string[] },
+  allAppKeys: string[],
+): string[] {
+  const appKeys = share.appKeys || []
+  if (appKeys.length) return appKeys
+  return share.type === 'api' ? [] : allAppKeys
 }
 
 /** 单批并发上限：回退路径专用，走慢一点避免触发服务端限流 */
@@ -134,25 +152,43 @@ function collectApiFromTree(
   return nodes
 }
 
+/** UIC-1 后端的所有文档/详情读取都走适配器；老 PHP 保持原 legacy 接口。 */
+const isUic = (backend: BackendAdapter) => backend.kind === 'uic'
+
+const apiMenusOf = async (backend: BackendAdapter, base: ApiMenusParams) =>
+  isUic(backend) ? backend.menus(base) : (await apidocApi.getApiMenus(base)).data
+
+const apiDetailOf = async (backend: BackendAdapter, base: ApiMenusParams, path: string) =>
+  isUic(backend)
+    ? backend.detail({ ...base, path })
+    : (await apidocApi.getApiDetail({ ...base, path })).data
+
+const docMenusOf = async (backend: BackendAdapter, base: ApiMenusParams) =>
+  isUic(backend) ? backend.docsMenus(base) : (await apidocApi.getDocMenus(base)).data
+
+const docDetailOf = async (backend: BackendAdapter, base: ApiMenusParams, path: string) =>
+  isUic(backend)
+    ? backend.docDetail({ ...base, path })
+    : (await apidocApi.getDocDetail({ ...base, path })).data
+
 /** 逐叶拉取接口详情（exportAllData 不可用时的回退路径；shareKey 透传走分享过滤） */
 async function collectApiByRequests(base: ApiMenusParams): Promise<DocNode[]> {
+  const backend = getBackend()
   const appStore = useAppOutsideStore()
   const app = appStore.appObject[base.appKey!]
   const appTitle = (app && app.title) || base.appKey
   const nodes: DocNode[] = []
-  const menusRes = await withRetry(() => apidocApi.getApiMenus(base))
+  const menusRes = await withRetry(() => apiMenusOf(backend, base))
 
   const apiLeaves: { leaf: ApiMenuItem; group: string[] }[] = []
-  collectLeaves(menusRes.data.data || [], [], (leaf, group) => {
+  collectLeaves(menusRes.data || [], [], (leaf, group) => {
     if (leaf.url && leaf.method) apiLeaves.push({ leaf, group })
   })
   for (let i = 0; i < apiLeaves.length; i += REQUEST_CONCURRENCY) {
     const chunk = apiLeaves.slice(i, i + REQUEST_CONCURRENCY)
     const chunkNodes = await Promise.all(
       chunk.map(async ({ leaf, group }) => {
-        const detail = await withRetry(() =>
-          apidocApi.getApiDetail({ ...base, path: leaf.menuKey }),
-        )
+        const detail = await withRetry(() => apiDetailOf(backend, base, leaf.menuKey))
         return {
           kind: 'api',
           appKey: base.appKey,
@@ -161,7 +197,7 @@ async function collectApiByRequests(base: ApiMenusParams): Promise<DocNode[]> {
           title: leafTitle(leaf),
           method: Array.isArray(leaf.method) ? leaf.method.join('/') : leaf.method,
           url: leaf.url,
-          detail: detail.data,
+          detail,
         } as DocNode
       }),
     )
@@ -173,29 +209,28 @@ async function collectApiByRequests(base: ApiMenusParams): Promise<DocNode[]> {
 
 /** 单个 app 范围的文档页（带 path 的叶子） */
 async function collectDocs(base: ApiMenusParams): Promise<DocNode[]> {
+  const backend = getBackend()
   const appStore = useAppOutsideStore()
   const app = appStore.appObject[base.appKey!]
   const appTitle = (app && app.title) || base.appKey
   const nodes: DocNode[] = []
-  const docMenusRes = await withRetry(() => apidocApi.getDocMenus(base))
+  const docMenusRes = await withRetry(() => docMenusOf(backend, base))
   const docLeaves: { leaf: ApiMenuItem; group: string[] }[] = []
-  collectLeaves(docMenusRes.data || [], [], (leaf, group) => {
+  collectLeaves(docMenusRes || [], [], (leaf, group) => {
     if (leaf.path) docLeaves.push({ leaf, group })
   })
   for (let i = 0; i < docLeaves.length; i += REQUEST_CONCURRENCY) {
     const chunk = docLeaves.slice(i, i + REQUEST_CONCURRENCY)
     const chunkNodes = await Promise.all(
       chunk.map(async ({ leaf, group }) => {
-        const res = await withRetry(() =>
-          apidocApi.getDocDetail({ ...base, path: leaf.menuKey || leaf.path! }),
-        )
+        const res = await withRetry(() => docDetailOf(backend, base, leaf.menuKey || leaf.path!))
         return {
           kind: 'doc',
           appKey: base.appKey,
           appTitle,
           group,
           title: leafTitle(leaf),
-          content: res.data.content,
+          content: res.content,
         } as DocNode
       }),
     )
@@ -206,54 +241,64 @@ async function collectDocs(base: ApiMenusParams): Promise<DocNode[]> {
 }
 
 /** 基础请求参数（当前 app / 分享 key 走 payload 鉴权） */
-function baseOf(appKey: string, options: CollectDocOptions, appStore: any): ApiMenusParams {
-  const base: ApiMenusParams = {
-    appKey,
-    lang: options.lang !== undefined ? options.lang : appStore.lang,
-  }
-  if (options.shareKey) base.shareKey = options.shareKey
+function baseOf(appKey: string, shareKey: string | undefined, lang: string): ApiMenusParams {
+  const base: ApiMenusParams = { appKey, lang }
+  if (shareKey) base.shareKey = shareKey
   return base
 }
 
 /**
  * 收集全部导出内容。
- * 任一请求失败即 reject，message 已可读（由调用方 toast）。
+ * 接口请求失败即 reject（message 可读，由调用方 toast）；文档按 app 容错，失败的 app 跳过。
  */
 export async function collectDoc(options: CollectDocOptions): Promise<DocNode[]> {
   const appStore = useAppOutsideStore()
   const nodes: DocNode[] = []
+  // 接口回退请求保持分享过滤；文档没有属主路由，属主导出按 app 用全局凭证读取，
+  // 不能把 key 当 shareKey 校验（密码分享会 401）。
+  const apiShareKey = options.shareKey || options.key
+  const lang = options.lang !== undefined ? options.lang : appStore.lang
 
   // 接口部分：单 app 或分享记录行 → 1 次 bulk 请求拿全部接口明细；其余逐 app
-  const singleOrShare = Boolean(options.shareKey) || options.appScopes.length === 1
+  const singleOrShare = Boolean(apiShareKey) || options.appScopes.length === 1
   if (singleOrShare) {
-    const bulkParams: ExportAllDataParams = {
-      lang: options.lang !== undefined ? options.lang : appStore.lang,
-    }
-    if (options.shareKey) bulkParams.key = options.shareKey
+    const bulkParams: ExportAllDataParams = { lang }
+    if (options.key) bulkParams.key = options.key
+    else if (options.shareKey) bulkParams.shareKey = options.shareKey
     else bulkParams.appKey = options.appScopes[0]
+    const backend = getBackend()
     try {
-      const res = await withRetry(() => apidocApi.exportAllData(bulkParams))
+      const res = await withRetry(() =>
+        backend.exportAllData
+          ? backend.exportAllData(bulkParams)
+          : apidocApi.exportAllData(bulkParams).then((response) => response.data),
+      )
       const titleOf = (appKey: string) => {
         const app = appStore.appObject[appKey]
         return (app && app.title) || ''
       }
-      nodes.push(...collectApiFromTree(res.data.apiData || [], titleOf))
+      nodes.push(...collectApiFromTree(res.apiData || [], titleOf))
     } catch (error) {
       // 老后端无 exportAllData → 逐 app 逐叶回退
       if (!bulkUnavailable(error)) throw error
       for (const appKey of options.appScopes) {
-        nodes.push(...(await collectApiByRequests(baseOf(appKey, options, appStore))))
+        nodes.push(...(await collectApiByRequests(baseOf(appKey, apiShareKey, lang))))
       }
     }
   } else {
     for (const appKey of options.appScopes) {
-      nodes.push(...(await collectApiByRequests(baseOf(appKey, options, appStore))))
+      nodes.push(...(await collectApiByRequests(baseOf(appKey, apiShareKey, lang))))
     }
   }
 
-  // 文档页
+  // 文档页：只有查看者导出带 shareKey（分享 token）；属主导出走 per-app 全局凭证。
+  // 单个 app 读取失败（如受密码保护且无 app token）只跳过它的文档，不影响 API 导出。
   for (const appKey of options.appScopes) {
-    nodes.push(...(await collectDocs(baseOf(appKey, options, appStore))))
+    try {
+      nodes.push(...(await collectDocs(baseOf(appKey, options.shareKey, lang))))
+    } catch (error) {
+      console.warn(`[apidoc export] skip docs for app ${appKey}: ${errMessage(error)}`)
+    }
   }
 
   // 按 app 归并分组：导出渲染按 appTitle 分节，接口与文档需保持同 app 相邻

@@ -29,7 +29,7 @@
   import ErrorCard from '/@/components/ErrorCard'
   import Skeleton from '../apiDetail/Skeleton.vue'
 
-  import apidocApi from '/@/api/apidocApi'
+  import { getBackend } from '/@/backend/state'
   import { useAppStore } from '/@/store'
   import { useRoute } from 'vue-router'
   import { AxiosError } from 'axios'
@@ -63,15 +63,15 @@
   const fetchMdDetail = () => {
     const query = route.query
     state.loading = true
-    apidocApi
-      .getDocDetail({
+    getBackend()
+      .docDetail({
         appKey: query.appKey ? (query.appKey as string) : appStore.appKey,
         path: query.key as string,
         lang: query.lang ? (query.lang as string) : appStore.lang,
       })
-      .then((res) => {
+      .then((doc) => {
         state.title = decodeURIComponent(query.title as string)
-        state.detail = res.data.content
+        state.detail = doc.content
         state.loading = false
       })
       .catch((err) => {

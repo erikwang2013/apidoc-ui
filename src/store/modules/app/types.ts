@@ -2,6 +2,7 @@ import { RouteLocationNormalized } from 'vue-router'
 import { ObjectType } from '/#/index'
 import { ConfigResult } from '/@/api/globalApi/types'
 import { ApiDetailParamItem } from '/@/api/apidocApi/types'
+import type { Capabilities } from '/@/backend/types'
 import { ThemeEnum } from '/@/enums/appEnum'
 import { AxiosError } from 'axios'
 import { AppObject } from './helper'
@@ -22,6 +23,7 @@ export interface AppState {
   lang: string
   keepAliveKeys: string[]
   appAuth: ObjectType<string>
+  capabilities?: Capabilities
   globalError: AxiosError
   appObject: ObjectType<AppObject>
   keepPages: any
@@ -32,6 +34,7 @@ export interface AppState {
 
 export interface FeConfig {
   TITLE: string
+  BACKEND?: 'auto' | 'php' | 'go' | 'rust'
   HTTP: Http
   AUTH?: Auth
   CACHE?: Cache

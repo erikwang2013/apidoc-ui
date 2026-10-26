@@ -66,7 +66,7 @@ npm run build   # vue-tsc 类型检查 + 构建，产物输出到 apidoc/ 目录
 ```js
 window.apidocFeConfig = {
   HTTP: {
-    HOSTS: ['https://api.example.com'], // 后端地址列表，可多个切换；留空 [] 则请求同源
+    HOSTS: [{ title: 'prod', host: 'https://api.example.com' }], // 后端地址列表，可多个切换；留空 [] 则请求同源
     API_PREFIX: '/apidoc', // 请求前缀，注释掉时默认 "/apidoc"
     TIMEOUT: 30000,
     WITHCREDENTIALS: false,
