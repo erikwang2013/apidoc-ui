@@ -36,12 +36,13 @@ jobs:
           VERSION="${{ steps.version.outputs.version }}"
           TAG="v${VERSION}"
           if git rev-parse -q --verify "refs/tags/${TAG}" >/dev/null; then
-            echo "tag ${TAG} 已存在，跳过"
+            gh release edit "${TAG}" --notes-file CHANGELOG.md
+            echo "tag ${TAG} 已存在，已同步 release notes"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git tag "${TAG}"
           git push origin "${TAG}"
-          gh release create "${TAG}" --title "${TAG}" --generate-notes
+          gh release create "${TAG}" --title "${TAG}" --notes-file CHANGELOG.md
           echo "已创建 ${TAG} tag + release"
