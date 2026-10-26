@@ -241,12 +241,13 @@ function baseOf(appKey: string, shareKey: string | undefined, lang: string): Api
 export async function collectDoc(options: CollectDocOptions): Promise<DocNode[]> {
   const appStore = useAppOutsideStore()
   const nodes: DocNode[] = []
-  // 属主导出（key）与查看者导出（shareKey）都按分享范围过滤文档页。
-  const shareKey = options.shareKey || options.key
+  // 接口回退请求保持分享过滤；文档没有属主路由，属主导出按 app 用全局凭证读取，
+  // 不能把 key 当 shareKey 校验（密码分享会 401）。
+  const apiShareKey = options.shareKey || options.key
   const lang = options.lang !== undefined ? options.lang : appStore.lang
 
   // 接口部分：单 app 或分享记录行 → 1 次 bulk 请求拿全部接口明细；其余逐 app
-  const singleOrShare = Boolean(shareKey) || options.appScopes.length === 1
+  const singleOrShare = Boolean(apiShareKey) || options.appScopes.length === 1
   if (singleOrShare) {
     const bulkParams: ExportAllDataParams = { lang }
     if (options.key) bulkParams.key = options.key
@@ -268,18 +269,18 @@ export async function collectDoc(options: CollectDocOptions): Promise<DocNode[]>
       // 老后端无 exportAllData → 逐 app 逐叶回退
       if (!bulkUnavailable(error)) throw error
       for (const appKey of options.appScopes) {
-        nodes.push(...(await collectApiByRequests(baseOf(appKey, shareKey, lang))))
+        nodes.push(...(await collectApiByRequests(baseOf(appKey, apiShareKey, lang))))
       }
     }
   } else {
     for (const appKey of options.appScopes) {
-      nodes.push(...(await collectApiByRequests(baseOf(appKey, shareKey, lang))))
+      nodes.push(...(await collectApiByRequests(baseOf(appKey, apiShareKey, lang))))
     }
   }
 
-  // 文档页
+  // 文档页：只有查看者导出带 shareKey（分享 token）；属主导出走 per-app 全局凭证。
   for (const appKey of options.appScopes) {
-    nodes.push(...(await collectDocs(baseOf(appKey, shareKey, lang))))
+    nodes.push(...(await collectDocs(baseOf(appKey, options.shareKey, lang))))
   }
 
   // 按 app 归并分组：导出渲染按 appTitle 分节，接口与文档需保持同 app 相邻
