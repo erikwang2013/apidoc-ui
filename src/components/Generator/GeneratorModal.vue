@@ -11,6 +11,13 @@
     @cancel="onCancel"
   >
     <div class="generator-wraper">
+      <a-alert
+        v-if="state.sideEffects"
+        class="mb-sm"
+        type="warning"
+        show-icon
+        :message="t('generator.sideEffectsWarning')"
+      />
       <div class="mb-sm">
         <data-form
           ref="formRef"
@@ -41,6 +48,20 @@
         :appKey="state.currentAppKey"
         :formData="state.formData"
       />
+      <div v-if="state.generatedFiles.length" class="generator-result">
+        <h4>{{ t('generator.result.title') }}</h4>
+        <div
+          v-for="file in state.generatedFiles"
+          :key="file.path || file.name"
+          class="generator-result-file"
+        >
+          <div class="flex">
+            <span class="flex-item">{{ file.path || file.name }}</span>
+            <a @click="onDownloadFile(file)">{{ t('common.download') }}</a>
+          </div>
+          <pre>{{ file.content }}</pre>
+        </div>
+      </div>
     </div>
     <template #footer>
       <a-button danger ghost @click="onCancel">{{ t('common.cancel') }}</a-button>
@@ -63,6 +84,14 @@
   import { notification, message } from 'ant-design-vue'
   import { AppItem, AppGroupItem } from '/@/api/globalApi/types'
   import apidocApi from '/@/api/apidocApi'
+  import { getBackend } from '/@/backend/state'
+  import { blobDownload } from '/@/utils/apidocExport/render'
+
+  interface GeneratedFile {
+    name: string
+    path: string
+    content: string
+  }
 
   const props = defineProps({
     onSuccess: {
@@ -104,6 +133,8 @@
     currentAppKey: string
     tableItems: ConfigGeneratorItemTableItem[]
     loading: boolean
+    sideEffects: boolean
+    generatedFiles: GeneratedFile[]
   }>({
     visible: false,
     modalTitle: t('generator.title'),
@@ -117,6 +148,9 @@
     currentAppKey: '',
     tableItems: [],
     loading: false,
+    // Legacy PHP generator executes code and may write files/tables.
+    sideEffects: getBackend().capabilities.features.generator.sideEffects === true,
+    generatedFiles: [],
   })
 
   onMounted(() => {
@@ -161,6 +195,21 @@
         files: fileDatas,
         tables: tables,
       }
+      state.loading = true
+      const backend = getBackend()
+      if (backend.generator) {
+        // UIC-1 声明式生成器只返回渲染结果，不写盘：保留弹窗供预览/下载。
+        try {
+          const res = await backend.generator.render(json)
+          state.generatedFiles = res.files || []
+          message.success(t('generator.renderSuccess'))
+        } catch (err) {
+          notifyError(err)
+        } finally {
+          state.loading = false
+        }
+        return
+      }
       apidocApi
         .generator(json)
         .then(() => {
@@ -171,21 +220,7 @@
         })
         .catch((err) => {
           state.loading = false
-          if (err.response) {
-            const message =
-              err.response && err.response.data && err.response.data.message
-                ? err.response.data.message
-                : err.message
-            notification.error({
-              message: err.response.status,
-              description: message,
-            })
-          } else {
-            // 无response(超时/断网/跨域)时err.response为空，直接展示err.message
-            notification.error({
-              message: err.message,
-            })
-          }
+          notifyError(err)
         })
     } catch (error) {
       state.loading = false
@@ -193,6 +228,26 @@
 
     // props.onSuccess && props.onSuccess()
   }
+
+  const notifyError = (err: any) => {
+    const description =
+      (err.response && err.response.data && err.response.data.message) || err.message
+    // 无response(超时/断网/跨域)时err.response为空，直接展示err.message
+    if (err.response && err.response.status) {
+      notification.error({ message: err.response.status, description })
+    } else {
+      notification.error({ message: description })
+    }
+  }
+
+  const onDownloadFile = (file: GeneratedFile) => {
+    blobDownload(
+      file.name || file.path || 'generated.txt',
+      file.content,
+      'text/plain;charset=utf-8',
+    )
+  }
+
   const onCancel = () => {
     state.visible = false
     props.onCancel && props.onCancel()
@@ -295,3 +350,28 @@
     }
   }
 </script>
+
+<style lang="less" scoped>
+  .generator-result {
+    margin-top: 12px;
+    border-top: 1px solid @border-line-color;
+    padding-top: 12px;
+    max-height: 40vh;
+    overflow-y: auto;
+    h4 {
+      margin-bottom: 8px;
+    }
+    .generator-result-file + .generator-result-file {
+      margin-top: 10px;
+    }
+    pre {
+      margin: 6px 0 0;
+      padding: 10px;
+      background: @page-bg-grey;
+      max-height: 220px;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+  }
+</style>

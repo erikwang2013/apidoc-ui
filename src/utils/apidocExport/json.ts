@@ -73,8 +73,8 @@ function itemSchema(row: ApiDetailParamItem): Obj {
   return { ...objectSchema(children), ...desc }
 }
 
-/** 响应/请求体行集 schema（空集返回 null） */
-function rowsSchema(rows: ApiDetailParamItem[] | undefined): Obj | null {
+/** 响应/请求体行集 schema（空集返回 null）；AsyncAPI 生成器复用同一列语义 */
+export function rowsSchema(rows: ApiDetailParamItem[] | undefined): Obj | null {
   const list = (rows || []).filter((r) => r.name)
   if (!list.length) return null
   if (list.length === 1 && jsonType(list[0].type) === 'array' && !list[0].children?.length) {

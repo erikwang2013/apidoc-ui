@@ -51,7 +51,7 @@
                       appStore.serverConfig.export_config &&
                       appStore.serverConfig.export_config.enable
                     "
-                    @click="onExportSwaggerJson(item)"
+                    @click="onExportDoc(item, 'openapi')"
                     >{{ t(`common.exportSwaggerJson`) }}</a
                   >
                   <a v-if="state.exportingKey !== item.key" @click="onExportDoc(item, 'md')">{{
@@ -107,6 +107,7 @@
   import { useAppStore } from '/@/store/modules/app'
   import { useI18n } from '/@/hooks/useI18n'
   import apidocApi from '/@/api/apidocApi'
+  import { getBackend } from '/@/backend/state'
   import { DeviceEnum } from '/@/enums/appEnum'
   import EditShareModal from './EditShare.vue'
   import { message } from 'ant-design-vue'
@@ -164,14 +165,14 @@
   })
 
   const fetchApiShareList = () => {
-    apidocApi
-      .getApiShareList({
-        pageIndex: state.pageIndex,
-      })
-      .then((res) => {
-        state.shareList = res.data.data
-        state.pageTotal = res.data.total
-      })
+    const backend = getBackend()
+    const request = backend.share
+      ? backend.share.list({ pageIndex: state.pageIndex })
+      : apidocApi.getApiShareList({ pageIndex: state.pageIndex }).then((res) => res.data)
+    request.then((res) => {
+      state.shareList = res.data
+      state.pageTotal = res.total
+    })
   }
   fetchApiShareList()
 
@@ -188,7 +189,11 @@
     editShareModal.value.onShow()
   }
   const confirmDelete = (item) => {
-    apidocApi.deleteApiShare({ key: item.key }).then(() => {
+    const backend = getBackend()
+    const request = backend.share
+      ? backend.share.remove({ key: item.key })
+      : apidocApi.deleteApiShare({ key: item.key }).then((res) => res.data)
+    request.then(() => {
       message.success(t('common.actionSuccess'))
       onReload()
     })
@@ -248,32 +253,13 @@
     }
   }
   const onItemActionClick = (item, index) => {
-    apidocApi
-      .handleApiShareAction({
-        key: item.key,
-        index,
-      })
-      .then((res) => {
-        if (res.data) {
-          dispatchShareAction(res.data)
-        }
-      })
-  }
-  const onExportSwaggerJson = (item) => {
-    apidocApi.exportSwagger({ key: item.key }).then((res) => {
-      try {
-        const jsonString = JSON.stringify(res.data, null, 2)
-        const blob = new Blob([jsonString], { type: 'application/json' })
-        const url = window.URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = `swagger-${item.name}.json`
-        document.body.appendChild(a)
-        a.click()
-        document.body.removeChild(a)
-        window.URL.revokeObjectURL(url)
-      } catch (error) {
-        message.error(t('common.exportError', { message: error }))
+    const backend = getBackend()
+    const request = backend.share
+      ? backend.share.action({ key: item.key, index })
+      : apidocApi.handleApiShareAction({ key: item.key, index }).then((res) => res.data)
+    request.then((data) => {
+      if (data) {
+        dispatchShareAction(data)
       }
     })
   }

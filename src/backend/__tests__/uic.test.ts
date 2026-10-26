@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { createUicAdapter } from '../uic'
+import { authKey } from '../../utils/helper/authKey'
 
 const fixture = (name: string) =>
   JSON.parse(
@@ -12,6 +13,8 @@ const menus = fixture('menus')[0].response.data
 const detail = fixture('detail')[0].response.data
 const config = fixture('config')[0].response.data
 const debug = Object.fromEntries(fixture('debug').map((f: any) => [f.name, f.response.data]))
+const share = Object.fromEntries(fixture('share').map((f: any) => [f.name, f.response.data]))
+const exportAll = fixture('export')[0].response.data
 
 const makeHttp = () => ({
   get: vi.fn(),
@@ -106,5 +109,120 @@ describe('createUicAdapter', () => {
       appKey: 'default',
       password: 'pw',
     })
+  })
+
+  it('isolates tokens per host for the same app key', async () => {
+    const tokens: Record<string, string> = {
+      [authKey('https://a.example', 'default')]: 'tok-a',
+      [authKey('https://b.example', 'default')]: 'tok-b',
+      [authKey('https://a.example', 'global')]: 'global-a',
+      [authKey('https://b.example', 'global')]: 'global-b',
+    }
+    const provider = (host: string) => (scope: string) => tokens[authKey(host, scope)]
+    const httpA = makeHttp()
+    const httpB = makeHttp()
+    httpA.post.mockResolvedValue({ code: 0, message: 'ok', data: menus })
+    httpB.post.mockResolvedValue({ code: 0, message: 'ok', data: menus })
+    const a = createUicAdapter(httpA as any, caps, { getToken: provider('https://a.example') })
+    const b = createUicAdapter(httpB as any, caps, { getToken: provider('https://b.example') })
+
+    await a.menus({ appKey: 'default' })
+    await b.menus({ appKey: 'default' })
+    await a.menus({ appKey: 'other' })
+    await b.menus({ appKey: 'other' })
+
+    expect(httpA.post).toHaveBeenNthCalledWith(1, '/ui/v1/menus', { appKey: 'default' }, 'tok-a')
+    expect(httpB.post).toHaveBeenNthCalledWith(1, '/ui/v1/menus', { appKey: 'default' }, 'tok-b')
+    expect(httpA.post).toHaveBeenNthCalledWith(2, '/ui/v1/menus', { appKey: 'other' }, 'global-a')
+    expect(httpB.post).toHaveBeenNthCalledWith(2, '/ui/v1/menus', { appKey: 'other' }, 'global-b')
+  })
+
+  it('routes share CRUD and share-scoped export', async () => {
+    const http = makeHttp()
+    const dataByPath: Record<string, unknown> = {
+      '/ui/v1/addApiShare': share['share-add'],
+      '/ui/v1/getApiShareList': share['share-list'],
+      '/ui/v1/getApiShareDetail': share['share-detail'],
+      '/ui/v1/deleteApiShare': share['share-delete'],
+      '/ui/v1/handleApiShareAction': share['share-action'],
+      '/ui/v1/exportAllData': exportAll,
+    }
+    http.post.mockImplementation(async (path: string) => ({
+      code: 0,
+      message: 'ok',
+      data: dataByPath[path],
+    }))
+    const tokens: Record<string, string> = { global: 'g', 'shareKey_share-1': 's' }
+    const adapter = createUicAdapter(http as any, caps, { getToken: (scope) => tokens[scope] })
+
+    expect(await adapter.share!.add({ name: 'Team' })).toBe(true)
+    expect((await adapter.share!.list({ pageIndex: 1 })).total).toBe(1)
+    expect((await adapter.share!.detail({ key: 'share-1' })).key).toBe('share-1')
+    expect(await adapter.share!.remove({ key: 'share-1' })).toBe(true)
+    expect(await adapter.share!.action({ key: 'share-1', index: 0 })).toEqual({
+      action: 'copy',
+      params: { url: 'https://api.example.com/apidoc?app=default' },
+    })
+    expect((await adapter.exportAllData!({ key: 'share-1' })).apiData).toHaveLength(1)
+
+    expect(http.post).toHaveBeenNthCalledWith(1, '/ui/v1/addApiShare', { name: 'Team' }, 'g')
+    expect(http.post).toHaveBeenNthCalledWith(2, '/ui/v1/getApiShareList', { pageIndex: 1 }, 'g')
+    expect(http.post).toHaveBeenNthCalledWith(3, '/ui/v1/getApiShareDetail', { key: 'share-1' }, 'g')
+    expect(http.post).toHaveBeenNthCalledWith(4, '/ui/v1/deleteApiShare', { key: 'share-1' }, 'g')
+    expect(http.post).toHaveBeenNthCalledWith(
+      5,
+      '/ui/v1/handleApiShareAction',
+      { key: 'share-1', index: 0 },
+      'g',
+    )
+    // 分享导出用分享 scope 的 token，而不是全局 token。
+    expect(http.post).toHaveBeenNthCalledWith(6, '/ui/v1/exportAllData', { key: 'share-1' }, 's')
+  })
+
+  it('routes cache and declarative generator calls', async () => {
+    const http = makeHttp()
+    http.post
+      .mockResolvedValueOnce({
+        code: 0,
+        message: 'ok',
+        data: { ok: true, mode: 'build', message: 'build-time materialized' },
+      })
+      .mockResolvedValueOnce({
+        code: 0,
+        message: 'ok',
+        data: { files: [{ name: 'User.ts', path: 'src/User.ts', content: 'export {}\n' }] },
+      })
+      .mockResolvedValueOnce({ code: 0, message: 'ok', data: { code: 'export {}\n' } })
+    const adapter = createUicAdapter(http as any, caps, { getToken: () => 'g' })
+
+    expect((await adapter.cache!.clear()).mode).toBe('build')
+    expect(
+      (await adapter.generator!.render({ index: 0, form: {}, files: [], tables: [] })).files[0]
+        .name,
+    ).toBe('User.ts')
+    expect(
+      (
+        await adapter.generator!.renderCodeTemplate({
+          appKey: 'default',
+          template: { title: 't', template: 'x' },
+          selected: [],
+          form: {},
+        })
+      ).code,
+    ).toBe('export {}\n')
+
+    expect(http.post).toHaveBeenNthCalledWith(1, '/ui/v1/cache/clear', {}, 'g')
+    expect(http.post).toHaveBeenNthCalledWith(
+      2,
+      '/ui/v1/generator',
+      { index: 0, form: {}, files: [], tables: [] },
+      'g',
+    )
+    expect(http.post).toHaveBeenNthCalledWith(
+      3,
+      '/ui/v1/renderCodeTemplate',
+      { appKey: 'default', template: { title: 't', template: 'x' }, selected: [], form: {} },
+      'g',
+    )
   })
 })

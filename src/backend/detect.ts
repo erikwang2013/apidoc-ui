@@ -22,8 +22,9 @@ const PHP_LEGACY_CAPABILITIES: Capabilities = {
     },
     share: { link: true, records: true, actions: true },
     cache: { manage: true, mode: 'server' },
-    generator: { forms: true, templates: true, sideEffects: false },
-    exports: ['md', 'pdf', 'openapi', 'postman', 'typescript'],
+    // Legacy PHP generator executes callables and may write files/tables.
+    generator: { forms: true, templates: true, sideEffects: true },
+    exports: ['md', 'pdf', 'openapi', 'postman', 'asyncapi', 'typescript'],
     auth: { global: true, app: true, shareToken: true },
   },
 }

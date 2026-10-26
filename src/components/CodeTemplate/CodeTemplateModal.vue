@@ -101,6 +101,7 @@
   import { useI18n } from '/@/hooks/useI18n'
   import ApiTreeSelect from '../ApiTreeSelect/ApiTreeSelect.vue'
   import apidocApi from '/@/api/apidocApi'
+  import { getBackend } from '/@/backend/state'
   import DataForm from '/@/components/DataForm'
   import { ConfigCodeTemplateItem } from '/@/api/globalApi/types'
   import { ObjectType } from '/#/index'
@@ -237,27 +238,25 @@
   }
 
   function fetchTemplateCode(params: CodeTemplateParams) {
-    apidocApi
-      .renderCodeTemplate(params)
+    state.loading = true
+    const backend = getBackend()
+    const request = backend.generator
+      ? backend.generator.renderCodeTemplate(params)
+      : apidocApi.renderCodeTemplate(params).then((res) => res.data)
+    request
       .then((res) => {
-        state.code = res.data.code
+        state.code = res.code
+        state.loading = false
       })
       .catch((err) => {
         state.loading = false
-        if (err.response) {
-          const message =
-            err.response && err.response.data && err.response.data.message
-              ? err.response.data.message
-              : err.message
-          notification.error({
-            message: err.response.status,
-            description: message,
-          })
+        const description =
+          (err.response && err.response.data && err.response.data.message) || err.message
+        if (err.response && err.response.status) {
+          notification.error({ message: err.response.status, description })
         } else {
-          notification.error({
-            message: err.response.status,
-            description: err.message,
-          })
+          // 无response(超时/断网/跨域)时err.response为空，直接展示err.message
+          notification.error({ message: description })
         }
       })
   }

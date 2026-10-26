@@ -68,6 +68,7 @@
   import { useAppStore } from '/@/store/modules/app'
   import { useI18n } from '/@/hooks/useI18n'
   import apidocApi from '/@/api/apidocApi'
+  import { getBackend } from '/@/backend/state'
   import { GetAllApiMenusResult, ApiMenuItem } from '/@/api/apidocApi/types'
   import { IResponse } from '/@/utils/http/axios/type'
   import { CopyrightCircleOutlined, FolderOutlined } from '@ant-design/icons-vue'
@@ -180,15 +181,18 @@
 
   const fetchApiShareDetail = (key: string) => {
     state.editKey = key
-    apidocApi.getApiShareDetail({ key }).then((res) => {
-      console.log(res)
-      state.formData = res.data
-      const type = res.data.type
+    const backend = getBackend()
+    const request = backend.share
+      ? backend.share.detail({ key })
+      : apidocApi.getApiShareDetail({ key }).then((res) => res.data)
+    request.then((data) => {
+      state.formData = data
+      const type = data.type
       state.currentType = type
       if (type == 'app') {
-        state.appCheckedKeys = res.data.appKeys as string[]
+        state.appCheckedKeys = (data.appKeys || []) as string[]
       } else if (type == 'api') {
-        state.apiCheckedKeys = res.data.apiKeys as string[]
+        state.apiCheckedKeys = (data.apiKeys || []) as string[]
       }
     })
   }
@@ -202,6 +206,26 @@
   fetchAppData()
 
   const fetchAllApiMenus = () => {
+    const backend = getBackend()
+    if (backend.kind === 'uic') {
+      // UIC-1 没有 allApiMenus：按 app 取菜单，拼成与 legacy 相同的 app 树。
+      const appKeys = Object.keys(appStore.appObject)
+      Promise.all(appKeys.map((appKey) => backend.menus({ appKey, lang: appStore.lang }))).then(
+        (results) => {
+          state.apiTreeData = results.map((res, index) => {
+            const appKey = appKeys[index]
+            const app = appStore.appObject[appKey]
+            return {
+              key: appKey,
+              appKey,
+              title: (app && app.title) || appKey,
+              children: res.data,
+            }
+          })
+        },
+      )
+      return
+    }
     apidocApi.getAllApiMenus().then((res: IResponse<GetAllApiMenusResult>) => {
       state.apiTreeData = res.data
     })
@@ -241,8 +265,12 @@
     if (state.editKey) {
       formData.key = state.editKey
     }
-    apidocApi.addApiShare(formData).then(() => {
-      message.success('common.actionSuccess')
+    const backend = getBackend()
+    const request = backend.share
+      ? backend.share.add(formData)
+      : apidocApi.addApiShare(formData).then((res) => res.data)
+    request.then(() => {
+      message.success(t('common.actionSuccess'))
       onCancel()
       emit('reload')
     })

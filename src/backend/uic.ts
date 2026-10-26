@@ -156,7 +156,12 @@ export function createUicAdapter(
 
   const exportAllData = async (params: ExportAllDataParams) =>
     unwrapEnvelope<ExportAllDataResult>(
-      await http.post('/ui/v1/exportAllData', params as unknown as Record<string, unknown>, getToken(params.appKey || 'global')),
+      await http.post(
+        '/ui/v1/exportAllData',
+        params as unknown as Record<string, unknown>,
+        // `key` is a share record: its export is authorized by the share token.
+        tokenFor({ appKey: params.appKey, shareKey: params.key }),
+      ),
     )
 
   return {
