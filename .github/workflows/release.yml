@@ -4,7 +4,7 @@ name: release
 # tag 与 GitHub Release（每次运行只补齐尚未发布的版本）。
 on:
   push:
-    branches: [main]
+    branches: [master, main]
   workflow_dispatch:
 
 permissions:

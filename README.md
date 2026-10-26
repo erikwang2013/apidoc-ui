@@ -98,7 +98,7 @@ npm run check:package-ui                  # 自检：重复打包哈希一致且
 
 `dist/uic1-ui/manifest.json` 记录 `version`、`builtAt`、`gitCommit` 与内容 `sha256`；`builtAt` 是打包时间，`SKIP_BUILD=1` 时 `gitCommit` 不保证是产物构建提交（脚本会校验构建版本与 `package.json` 一致）。同一份包部署到三端后 `sha256` 应保持一致。升级步骤、后端配置（`BACKEND`、Rust `ui`/`ui_path`、Go `UIPath`）、版本矩阵与回滚见 [UIC-1 升级指南](docs/superpowers/guides/2026-10-26-uic1-upgrade.md)。
 
-发布流程：同步更新 `package.json` / `package-lock.json` 与根目录 `VERSION`，推送到 `main` 后 `.github/workflows/release.yml` 会读取 `VERSION`，在 `v<版本>` tag 不存在时创建 tag 和 GitHub Release；也可在 Actions 中手动触发。
+发布流程：同步更新 `package.json` / `package-lock.json` 与根目录 `VERSION`，推送到 `master` 后 `.github/workflows/release.yml` 会读取 `VERSION`，在 `v<版本>` tag 不存在时创建 tag 和 GitHub Release；也可在 Actions 中手动触发。
 
 ## 配置说明
 
