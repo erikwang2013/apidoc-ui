@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
-# UIC-1 Phase 1 E2E: live PHP fixture server + Go/Rust UIC-1 route tests.
+# UIC-1 E2E (Phase 1 + Phase 2 management): live PHP fixture server +
+# Go/Rust UIC-1 route tests.
 #
 #   scripts/e2e-uic1.sh
 #
 # Worktrees default to the siblings of this repo (<root>/php, <root>/go,
 # <root>/rust); override with APIDOC_PHP_DIR / APIDOC_GO_DIR / APIDOC_RUST_DIR.
-# The PHP port defaults to 18081; override with UIC1_PHP_PORT.
+# The PHP port defaults to 18091; override with UIC1_PHP_PORT.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -142,6 +143,64 @@ php_e2e() {
     '.code==0 and .data.name=="listUsers" and .data.url=="/users"' \
     "$(req POST "$BASE/detail" "$(jq -cn --arg k "$menu_key" '{appKey:"default",path:$k}')" "$token")"
 
+  # --- Phase 2 management ---
+
+  check_php "capabilities management" 200 \
+    '.code==0 and .data.features.share.records==true and .data.features.cache.manage==true and .data.features.generator.templates==true and .data.features.auth.shareToken==true' \
+    "$(req GET "$BASE/capabilities")"
+
+  local share_name="UIC-1 E2E share" share_key="" share_token="" share_menu_key=""
+  check_php "share add" 200 \
+    '.code==0 and .data==true' \
+    "$(req POST "$BASE/addApiShare" "$(jq -cn --arg n "$share_name" '{name:$n,type:"app",appKeys:["default"],password:"share-pw"}')" "$token")"
+
+  check_php "share list" 200 \
+    '.code==0 and .data.total>=1 and ([.data.data[] | select(.name=="UIC-1 E2E share")] | length)==1' \
+    "$(req POST "$BASE/getApiShareList" '{"pageIndex":1}' "$token")"
+  share_key="$(jq -r '.data.data[] | select(.name=="UIC-1 E2E share") | .key' "$TMP_DIR/body" | head -n1)"
+
+  check_php "share detail" 200 \
+    '.code==0 and .data.name=="UIC-1 E2E share" and .data.type=="app" and (.data|has("password")|not)' \
+    "$(req POST "$BASE/getApiShareDetail" "$(jq -cn --arg k "$share_key" '{key:$k}')" "$token")"
+
+  check_php "share login" 200 \
+    '.code==0 and (.data.token|type=="string") and (.data.token|length>0)' \
+    "$(req POST "$BASE/verifyAuth" "$(jq -cn --arg k "$share_key" '{shareKey:$k,password:"share-pw"}')")"
+  share_token="$(jq -r '.data.token // empty' "$TMP_DIR/body")"
+
+  check_php "share config scope" 200 \
+    '.code==0 and .data.title=="UIC-1 E2E" and .data.apps[0].key=="default"' \
+    "$(req GET "$BASE/config?appKey=default&shareKey=$share_key" '' "$share_token")"
+
+  check_php "share menus scope" 200 \
+    '.code==0 and (.data.data|length>=1)' \
+    "$(req POST "$BASE/menus" "$(jq -cn --arg k "$share_key" '{appKey:"default",shareKey:$k}')" "$share_token")"
+  share_menu_key="$(jq -r '.data.data[0].children[0].menuKey // empty' "$TMP_DIR/body")"
+
+  check_php "share detail scope" 200 \
+    '.code==0 and .data.name=="listUsers"' \
+    "$(req POST "$BASE/detail" "$(jq -cn --arg k "$share_key" --arg p "$share_menu_key" '{appKey:"default",shareKey:$k,path:$p}')" "$share_token")"
+
+  check_php "cache clear" 200 \
+    '.code==0 and .data.ok==true and .data.mode=="server"' \
+    "$(req POST "$BASE/cache/clear" '{}' "$token")"
+
+  check_php "cache warm" 200 \
+    '.code==0 and .data.ok==true and .data.mode=="server"' \
+    "$(req POST "$BASE/cache/warm" '{}' "$token")"
+
+  check_php "exportAllData" 200 \
+    '.code==0 and (.data.apiData|type=="array") and ([.data.apiData[] | .. | objects | select(.name=="listUsers" and .url=="/users")]|length>=1)' \
+    "$(req POST "$BASE/exportAllData" '{"appKey":"default"}' "$token")"
+
+  check_php "share delete" 200 \
+    '.code==0 and .data==true' \
+    "$(req POST "$BASE/deleteApiShare" "$(jq -cn --arg k "$share_key" '{key:$k}')" "$token")"
+
+  check_php "share detail after delete" 404 \
+    '.code!=0' \
+    "$(req POST "$BASE/getApiShareDetail" "$(jq -cn --arg k "$share_key" '{key:$k}')" "$token")"
+
   stop_php
   return $((PHP_OK == 1 ? 0 : 1))
 }
@@ -189,7 +248,8 @@ rust_e2e() {
     return 1
   }
   run_tests "rust" "$RUST_DIR" "$RUST_TIMEOUT" \
-    cargo test -p apidoc-rust --test uic1_routes --features axum
+    cargo test -p apidoc-rust --test uic1_routes --test uic1_debug_scope \
+    --test uic1_management --features axum
 }
 
 overall=1
