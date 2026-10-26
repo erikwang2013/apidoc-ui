@@ -68,3 +68,7 @@ The final cross-repo review found four Important capability/test gaps; all were 
 - E2E now serves the same `dist/uic1-ui` package from Go and Rust (`TestPackagedUIServed`, `packaged_ui_is_served_when_configured`) and verifies its manifest hash; `RESULT static-ui: PASS`.
 
 Final merged commits: UI `6460eaf`, PHP `acced13`, Go `78c6e52`, Rust `7756c88`.
+
+## Post-final resource-limit fix
+
+A follow-up security review found parsed-row amplification from small DNP3/IEC104 frames (packed DNP3 points and IEC104 sequence ASDU rows were bounded only by wire bytes). Added hard caps in PHP, Go and Rust: DNP3 10,000 points per response (Go already had it; PHP/Rust added, plus a Rust u16 range-overflow fix) and IEC104 10,000 rows. Regression tests cover the caps.
