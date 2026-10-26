@@ -32,7 +32,6 @@
               "sip",
               "grpc",
               "hessian",
-              "hls",
               "thrift",
               "dubbo",
               "http2",
@@ -171,7 +170,7 @@
             "relay": [
               "http",
               "websocket",
-              "sse",
+              "raw",
               "grpc",
               "thrift",
               "dubbo",
@@ -184,8 +183,7 @@
               "browser-http",
               "browser-websocket",
               "browser-sse",
-              "relay-unary",
-              "relay-stream"
+              "relay-unary"
             ]
           },
           "share": {
@@ -198,7 +196,7 @@
             "mode": "build"
           },
           "generator": {
-            "forms": true,
+            "forms": false,
             "templates": true,
             "sideEffects": false
           },
@@ -375,8 +373,7 @@
               "browser-http",
               "browser-websocket",
               "browser-sse",
-              "relay-unary",
-              "relay-stream"
+              "relay-unary"
             ]
           },
           "share": {
