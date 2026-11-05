@@ -7,6 +7,21 @@ export const createRandKey = (): string => {
   return new Date().getTime() + Math.ceil(Math.random() * 1000) + ''
 }
 
+/** 仅允许绝对 http(s) URL，阻断 javascript:/data: 等脚本协议 */
+export const isHttpUrl = (url: unknown): url is string =>
+  typeof url === 'string' && /^https?:\/\//i.test(url)
+
+/** 下载链接允许 http(s)、blob 与 data，阻断 javascript:/vbscript: */
+export const isSafeDownloadUrl = (url: unknown): url is string => {
+  if (typeof url !== 'string' || !url.trim()) return false
+  try {
+    const { protocol } = new URL(url, 'http://localhost')
+    return ['http:', 'https:', 'blob:', 'data:'].includes(protocol)
+  } catch {
+    return false
+  }
+}
+
 export const handleTableDataRowKey = (data: any[]): any[] => {
   return data.map((item) => {
     item.key = `${item.name}_${getRandomNumber(999)}`

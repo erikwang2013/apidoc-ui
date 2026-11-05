@@ -1,4 +1,5 @@
-import Mock from 'mockjs'
+import '/@/utils/helper/mockExtend'
+import { safeMock } from '/@/utils/helper/safeMock'
 import { ApiDetailParamItem } from '/@/api/apidocApi/types'
 import { ConfigGlobalParams } from '/@/api/globalApi/types'
 import { createRandKey, deepClone } from '/@/utils/helper'
@@ -28,7 +29,7 @@ export const renderData = (
         if (globalParamFind && globalParamFind.value) {
           item.default = globalParamFind.value
         } else if (item.mock) {
-          item.default = Mock.mock(item.mock)
+          item.default = safeMock(item.mock)
         }
         item.id = createRandKey()
         return item
@@ -36,7 +37,7 @@ export const renderData = (
     } else {
       return data.map((item) => {
         if (item.mock) {
-          item.default = Mock.mock(item.mock)
+          item.default = safeMock(item.mock)
         }
         item.id = createRandKey()
         return item
@@ -68,7 +69,7 @@ export const handleQueryParams = (queryParams: ApiDetailParamItem[], prefix = ''
         item.name = `${prefix}[${item.name}]`
       }
       if (item.mock) {
-        item.default = Mock.mock(item.mock)
+        item.default = safeMock(item.mock)
       }
       params.push(item)
     }

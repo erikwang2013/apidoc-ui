@@ -20,7 +20,6 @@ import {
   GetApiShareListParams,
   ApiShareListResult,
   HandleApiShareActionParams,
-  ExportSwaggerParams,
   ExportAllDataParams,
   ExportAllDataResult,
 } from './types'
@@ -41,7 +40,6 @@ export enum URL {
   getApiShareDetail = '/getApiShareDetail',
   deleteApiShare = '/deleteApiShare',
   handleApiShareAction = '/handleApiShareAction',
-  exportSwagger = '/exportSwagger',
   exportAllData = '/exportAllData',
 }
 
@@ -83,8 +81,6 @@ export default class globalApi {
     post<ApiShareListItem>({ url: URL.deleteApiShare, data })
   static handleApiShareAction = async (data: HandleApiShareActionParams) =>
     post<any>({ url: URL.handleApiShareAction, data })
-  static exportSwagger = async (data: ExportSwaggerParams) =>
-    post<any>({ url: URL.exportSwagger, data })
   // 一次性导出：1 个请求返回全部接口菜单 + 详情（避免逐接口请求触发 429）
   static exportAllData = async (data: ExportAllDataParams) =>
     post<ExportAllDataResult>({ url: URL.exportAllData, data })

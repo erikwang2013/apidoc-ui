@@ -7,9 +7,6 @@ import './styles/index.less'
 
 import 'ant-design-vue/es/message/style/css'
 
-// 支持SVG
-import 'virtual:svg-icons-register'
-
 import { setupI18n } from '/@/locales/setupI18n'
 import { downloadFile } from '/@/utils/helper/index'
 

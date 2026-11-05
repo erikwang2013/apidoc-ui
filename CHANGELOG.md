@@ -3,6 +3,27 @@
 本项目记录所有值得注意的变更。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，
 版本号遵循语义化版本。
 
+## [3.4.1] - 2026-11-05
+
+### Security
+
+- 移除未使用的商业字体 Blimone，项目仅保留自绘 iconfont。
+- 依赖漏洞清零（`npm audit` 0）：升级 axios 1.21、DOMPurify 3.4.17、Vue 3.5.44、
+  Vite 6.4.5、vue-i18n 11.4.18、vitest 5.1.0，并修复 lodash、follow-redirects、
+  minimatch、svgo 等传递漏洞。
+- 用维护中的 `better-mock` 替换 `mockjs`，新增 `safeMock` 参数白名单，阻止文档中的
+  mock 模板经 eval 执行任意 JS。
+- CSP 改为 nonce + `strict-dynamic`（新增 `config/vite/plugins/csp.ts`），限制脚本来源。
+- 分享动作 `openUrl`/`download` 与 iframe `src` 增加 URL 协议校验，阻断
+  `javascript:`/`data:` 注入。
+
+### Changed
+
+- 清理未使用文件与依赖：空文件 `base.less`、重复/未引用的 SVG、`prettier.config.js`、
+  未使用的 `vite-plugin-svg-icons` 插件及配置；移除未调用的 `exportSwagger` 接口。
+- favicon 从 423KB 优化到 32KB，并新增 SVG favicon。
+- README 新增「安全说明」，记录 CSP、token 存储与调试中继的后端约束。
+
 ## [3.4.0] - 2026-10-26
 
 ### Added

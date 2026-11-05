@@ -111,7 +111,12 @@
   import { DeviceEnum } from '/@/enums/appEnum'
   import EditShareModal from './EditShare.vue'
   import { message } from 'ant-design-vue'
-  import { copyTextToClipboard, downloadFile } from '/@/utils/helper/index'
+  import {
+    copyTextToClipboard,
+    downloadFile,
+    isHttpUrl,
+    isSafeDownloadUrl,
+  } from '/@/utils/helper/index'
   import { collectDoc, errMessage, ownerExportAppScopes } from '/@/utils/apidocExport/collect'
   import {
     blobDownload,
@@ -229,6 +234,7 @@
     const params = (actionData && actionData.params) || {}
     switch (action) {
       case 'openUrl':
+        if (!isHttpUrl(params.url)) break
         window.open(params.url, params.target || '_blank')
         break
       case 'copy':
@@ -236,6 +242,7 @@
         message.success(t('common.copySuccess'))
         break
       case 'download':
+        if (!isSafeDownloadUrl(params.url)) break
         downloadFile(params.url, params.name)
         break
       case 'message': {

@@ -267,13 +267,9 @@ export interface HandleApiShareActionParams {
   index: number
 }
 
-export interface ExportSwaggerParams {
-  key: string
-}
-
 export interface ExportAllDataParams {
   lang?: string
-  /** 分享记录 key（属主路径，全局 token 鉴权，按分享可见范围导出，同 exportSwagger） */
+  /** 分享记录 key（属主路径，全局 token 鉴权，按分享可见范围导出） */
   key?: string
   /** 分享页查看者（分享 token 鉴权，按分享范围导出） */
   shareKey?: string

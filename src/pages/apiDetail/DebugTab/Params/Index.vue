@@ -39,7 +39,6 @@
         :tab="t('apiPage.debug.body')"
       >
         <body-params
-          ref="bodyRef"
           :data="state.bodyData"
           :detailParams="props.detail.param"
           @change="onBodyDataChange"
@@ -81,8 +80,6 @@
     }>(),
     {},
   )
-  const bodyRef = ref()
-
   const state = reactive<{
     activeTab: string
     headerData: ApiDetailParamItem[]

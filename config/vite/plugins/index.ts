@@ -5,9 +5,9 @@
 import type { Plugin } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
-import { ConfigSvgIconsPlugin } from './svgIcons'
 import { AutoRegistryComponents } from './component'
 import { AutoImportDeps } from './autoImport'
+import { ConfigCspPlugin } from './csp'
 import { ConfigVisualizerConfig } from './visualizer'
 import { ConfigCompressPlugin } from './compress'
 import { ThemePreprocessor } from './theme'
@@ -41,11 +41,11 @@ export function createVitePlugins(isBuild: boolean) {
     }),
   ]
 
-  // vite-plugin-svg-icons
-  vitePlugins.push(ConfigSvgIconsPlugin(isBuild))
-
   // rollup-plugin-visualizer
   vitePlugins.push(ConfigVisualizerConfig())
+
+  // CSP（必须最后注册，确保 nonce 覆盖所有 script 标签）
+  vitePlugins.push(ConfigCspPlugin())
 
   return vitePlugins
 }

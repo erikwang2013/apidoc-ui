@@ -1,5 +1,5 @@
-import Mock from 'mockjs'
 import './mockExtend'
+import { safeMock } from './safeMock'
 import { ObjectType } from '/#/index'
 import { ConfigGlobalParams } from '/@/api/globalApi/types'
 import { ApiDetailParamItem } from '/@/api/apidocApi/types'
@@ -17,7 +17,7 @@ export function renderCodeJsonByParams<T>(
     params.forEach((item: any) => {
       let fieldValue = item.default
       if (isMock && item.mock) {
-        fieldValue = Mock.mock(item.mock)
+        fieldValue = safeMock(item.mock)
       }
       if (fieldValue == undefined) {
         switch (item.type) {

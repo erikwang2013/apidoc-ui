@@ -52,5 +52,3 @@ export async function initBackend(override?: BackendOverride): Promise<BackendAd
   appStore.setCapabilities(adapter.capabilities)
   return adapter
 }
-
-export const resetBackend = () => setBackend(null)

@@ -1,7 +1,7 @@
 /**
  * mock数据自定义生成规则
  */
-import Mock from 'mockjs'
+import Mock from 'better-mock'
 import { createIdcard } from './index'
 import { FeConfig } from '/@/store/modules/app/types'
 

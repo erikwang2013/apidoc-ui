@@ -23,6 +23,7 @@
   import LoadingCard from '/@/components/LoadingCard'
   import useDevice from '/@/hooks/useDevice'
   import { initBackend } from '/@/backend'
+  import { isHttpUrl } from '/@/utils/helper'
   import { BackendDetectionError } from '/@/backend/detect'
   import { ApiMenusParams } from '/@/api/apidocApi/types'
   import { useRoute, useRouter } from 'vue-router'
@@ -39,7 +40,7 @@
     openTab: function (data) {
       // 仅允许 http/https 协议，防止 javascript:/data: 等注入
       const url = data.params && data.params.url
-      if (typeof url !== 'string' || !/^https?:\/\//i.test(url)) {
+      if (!isHttpUrl(url)) {
         return
       }
       router.push({

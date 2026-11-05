@@ -1,4 +1,4 @@
-![ApiDoc-Ui 宠物](assets/apidoc-pet.svg)
+![ApiDoc-Ui 宠物](src/assets/images/apidoc-pet.svg)
 
 # ApiDoc UI
 
@@ -9,6 +9,7 @@
 
 基于 Vue3 + TypeScript 的 API 接口文档前端，配合 [apidoc-php](https://github.com/erikwang2013/apidoc-php)、[apidoc-rust](https://github.com/erikwang2013/apidoc-rust)、[apidoc-go](https://github.com/erikwang2013/apidoc-go) 后端使用。构建产物为纯静态文件，不依赖任何后端运行环境。
 
+<!-- GitHub 仓库社交预览图使用 assets/social-preview.png（1200×630，仓库 Settings 中上传） -->
 <p align="center"><img src="assets/social-preview.svg" alt="ApiDoc UI — Vue3 + TypeScript 静态 API 文档前端，PHP / Go / Rust 三端共用" width="720"></p>
 
 ## 项目介绍
@@ -148,6 +149,12 @@ window.apidocFeConfig = {
 | `VITE_APP_DEBUG_TOOL` | 移动端调试工具：`eruda` / `vconsole`，留空关闭     |
 | `VITE_DROP_CONSOLE`   | 是否在构建产物中剔除 console（config/constant.ts） |
 | `VITE_BUILD_COMPRESS` | 产物压缩：默认 `gzip,brotli`，可设 `gzip` / `none` |
+
+## 安全说明
+
+- 页面 CSP 由 `config/vite/plugins/csp.ts` 在启动/构建时生成 nonce：脚本需带 nonce，或由受信任脚本通过 `strict-dynamic` 动态加载（`config.js`、`LOAD_SCRIPTS`）。`unsafe-eval` 仅因 better-mock 解析占位符参数需要，模板参数已由 `src/utils/helper/safeMock.ts` 白名单校验。
+- 授权 token 存放在 localStorage（按 host + appKey/global 作用域隔离），XSS 可直接读取。若要彻底消除该风险，需要后端改为 `Set-Cookie`（HttpOnly / Secure / SameSite）并在 PHP/Go/Rust 三端同时落地；前端已按 `HTTP.WITHCREDENTIALS` 携带凭证。
+- 协议调试会把用户填写的 target 交给后端连接，SSRF 白名单必须由后端执行；契约用例见 `contract/uic-1/fixtures/debug.json` 的 `debug-send-denied`。
 
 ## 目录结构
 
